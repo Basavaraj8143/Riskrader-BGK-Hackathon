@@ -1,0 +1,55 @@
+# ==== 🐍 BACKEND (Python) ====
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Environment variables
+.env
+.env.*
+
+# Datasets, Models, and Large Files
+*.csv
+*.tsv
+*.pkl
+backend/engine/india_fraud_detection_FINAL.csv
+backend/engine/models/
+backend/models/
+
+
+# ==== ⚛️ FRONTEND (Node / Next / Vite) ====
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Production / Build
+dist/
+dist-ssr/
+build/
+out/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+
+# ==== ⚙️ OS & EDITOR ====
+.DS_Store
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
