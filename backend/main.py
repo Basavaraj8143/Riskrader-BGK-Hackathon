@@ -4,9 +4,9 @@ from pydantic import BaseModel
 from typing import Optional
 from engine.scorer import analyze_message
 from engine.gemini_explainer import get_gemini_explanation
-from engine.ollama_client import get_local_explanation   # Analyzer-only: local DeepSeek R1
+from engine.ollama_client import get_local_explanation, get_local_complaint  # Evidence + Analyzer: local DeepSeek R1
 from engine.extractor import extract_entities, format_complaint_context
-from engine.complaint_gen import generate_complaint
+from engine.portal_guide import build_portal_guide
 from services.news_fetcher import fetch_fraud_trends
 
 app = FastAPI(title="FinGuard AI API", version="1.0.0")
@@ -216,22 +216,31 @@ async def extract_evidence(req: EvidenceRequest):
     # --- Step 3: Fraud Analysis ---
     analysis = analyze_message(source_text)
 
-    # --- Step 4: Gemini Fraud Explanation ---
-    explanation_data = get_gemini_explanation(
+    # --- Step 4: Local DeepSeek Fraud Explanation ---
+    explanation_data = get_local_explanation(
         message=source_text[:500],
         matched_patterns=analysis["matched_patterns"],
         category=analysis["category"],
         score=analysis["score"],
     )
 
-    # --- Step 5: Generate Complaint Draft ---
-    complaint_data = generate_complaint(
-        original_text=req.text or "",
+    # --- Step 5: Local DeepSeek Complaint Draft ---
+    complaint_data = get_local_complaint(
+        text=req.text or "",
         entities=entities,
         category=analysis["category"],
         score=analysis["score"],
         explanation=explanation_data["explanation"],
-        ocr_text=ocr_text,
+    )
+
+    portal_guide = build_portal_guide(
+        original_text=req.text or source_text,
+        entities=entities,
+        category=analysis["category"],
+        score=analysis["score"],
+        level=analysis["level"],
+        explanation=explanation_data["explanation"],
+        matched_patterns=analysis["matched_patterns"],
     )
 
     return {
@@ -242,11 +251,13 @@ async def extract_evidence(req: EvidenceRequest):
         "category": analysis["category"],
         "matched_patterns": analysis["matched_patterns"],
         "explanation": explanation_data["explanation"],
+        "powered_by": explanation_data["powered_by"],
         "complaint_draft": complaint_data["complaint"],
         "complaint_by": complaint_data["generated_by"],
         "entity_count": sum(
             len(v) for v in entities.values() if isinstance(v, list)
         ),
+        "portal_guide": portal_guide,
     }
 
 

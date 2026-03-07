@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 
+// ── Entity Config ─────────────────────────────────────────────────
 const ENTITY_CONFIG = [
     { key: 'upi_ids', icon: '💸', label: 'UPI IDs', color: '#ff3b5c', emptyMsg: 'No UPI IDs found' },
     { key: 'phone_numbers', icon: '📞', label: 'Phone Numbers', color: '#ffcc00', emptyMsg: 'No phone numbers found' },
@@ -11,503 +12,431 @@ const ENTITY_CONFIG = [
 ];
 
 const SAMPLES = [
-    {
-        label: '📱 UPI Fraud SMS',
-        text: 'Congratulations! Your UPI cashback of Rs 5000 is ready. Pay Rs 1 to receive it. UPI: scammer@okaxis | Contact: 9876543210 | Link: bit.ly/getmoney | Hurry, expires 03/03/2026 at 11:59 PM!'
-    },
-    {
-        label: '🏦 KYC Phishing',
-        text: 'Dear SBI customer, your KYC has expired. Click http://sbi-kyc-update.com/verify to update immediately. Your account will be blocked by 25/02/2026. Call 8800112233 for help. Reference: ACC123456789.'
-    },
-    {
-        label: '📈 Investment Scam',
-        text: 'Join WhatsApp investment group! Guaranteed 5% daily returns. Contact agent at invest.guru@paytm. Pay Rs 5000 to receive Rs 50000 in 30 days! Call 9000011111. Telegram: t.me/earnfast'
-    },
+    { label: '📱 UPI Fraud SMS', text: 'Congratulations! Your UPI cashback of Rs 5000 is ready. Pay Rs 1 to receive it. UPI: scammer@okaxis | Contact: 9876543210 | Link: bit.ly/getmoney | Expires 03/03/2026 at 11:59 PM!' },
+    { label: '🏦 KYC Phishing', text: 'Dear SBI customer, your KYC has expired. Click http://sbi-kyc-update.com/verify to update immediately. Your account will be blocked by 25/02/2026. Call 8800112233 for help.' },
+    { label: '📈 Investment Scam', text: 'Join WhatsApp investment group! Guaranteed 5% daily returns. Contact invest.guru@paytm. Pay Rs 5000 to receive Rs 50000 in 30 days! Call 9000011111. Telegram: t.me/earnfast' },
 ];
 
+const PLATFORMS = ['Email', 'Facebook', 'Instagram', 'Snapchat', 'Twitter', 'WhatsApp', 'Website URL', 'YouTube', 'LinkedIn', 'Telegram', 'Mobile App', 'SMS', 'Other'];
+const TITLES = ['Mr', 'Mrs', 'Dr', 'Shri', 'Smt', 'Prof', 'Miss'];
+const GENDERS = ['Male', 'Female', 'Other'];
+const RELATIONS = ['Father', 'Mother', 'Spouse'];
+
+// ── Tiny helpers ──────────────────────────────────────────────────
 function CopyBtn({ text }) {
-    const [copied, setCopied] = useState(false);
-    const copy = () => {
-        navigator.clipboard.writeText(text);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
+    const [ok, setOk] = useState(false);
     return (
-        <button onClick={copy} style={{ background: 'none', border: 'none', cursor: 'pointer', color: copied ? '#00ff41' : 'var(--text-muted)', fontSize: 12, fontFamily: 'var(--font-mono)', padding: '2px 6px', transition: 'color 0.2s' }}>
-            {copied ? '✓ copied' : '⎘ copy'}
+        <button onClick={() => { navigator.clipboard.writeText(text); setOk(true); setTimeout(() => setOk(false), 2000); }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: ok ? '#00ff41' : 'rgba(0,255,65,0.5)', fontSize: 13, padding: '2px 4px', transition: 'color .2s' }}>
+            {ok ? '✓' : '⎘'}
         </button>
     );
 }
 
+function PortalField({ label, value, status, note }) {
+    const [ok, setOk] = useState(false);
+    const pre = status === 'prefilled' || status === 'user_provided';
+    return (
+        <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', gap: 0, borderBottom: '1px solid rgba(255,255,255,0.04)', padding: '10px 0', alignItems: 'start' }}>
+            <div style={{ fontSize: 10.5, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', paddingRight: 10, paddingTop: 2, lineHeight: 1.4 }}>{label}</div>
+            <div>
+                {pre ? (
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+                        <div style={{ flex: 1, background: status === 'user_provided' ? 'rgba(0,200,255,0.06)' : 'rgba(0,255,65,0.05)', border: `1px solid ${status === 'user_provided' ? 'rgba(0,200,255,0.25)' : 'rgba(0,255,65,0.2)'}`, borderRadius: 4, padding: '5px 10px', fontSize: 11.5, color: status === 'user_provided' ? '#00cfff' : '#00ff41', fontFamily: 'var(--font-mono)', lineHeight: 1.5, wordBreak: 'break-word' }}>
+                            {value}
+                        </div>
+                        <button onClick={() => { navigator.clipboard.writeText(value); setOk(true); setTimeout(() => setOk(false), 2000); }}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: ok ? '#00ff41' : 'rgba(0,255,65,0.4)', fontSize: 13, padding: '4px', transition: 'color .2s', flexShrink: 0 }}>{ok ? '✓' : '⎘'}</button>
+                    </div>
+                ) : (
+                    <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 4, padding: '5px 10px', fontSize: 11, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', lineHeight: 1.5, fontStyle: 'italic' }}>
+                        {value || '— fill manually on portal —'}
+                    </div>
+                )}
+                {note && <div style={{ fontSize: 10, color: pre ? 'rgba(0,255,65,0.45)' : 'rgba(255,255,255,0.25)', marginTop: 3, fontFamily: 'var(--font-mono)', lineHeight: 1.4 }}>{pre ? '✓' : 'ℹ'} {note}</div>}
+            </div>
+        </div>
+    );
+}
+
+function SectionHeader({ number, title, prefilled, total }) {
+    return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+            <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(0,255,255,0.08)', border: '1px solid rgba(0,255,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: '#00ffff', fontFamily: 'var(--font-mono)', flexShrink: 0 }}>{number}</div>
+            <div style={{ flex: 1, fontSize: 11, fontWeight: 700, color: '#00ffff', letterSpacing: 1.5, textTransform: 'uppercase' }}>{title}</div>
+            {prefilled > 0 && <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', padding: '2px 8px', borderRadius: 3, background: 'rgba(0,255,65,0.06)', border: '1px solid rgba(0,255,65,0.2)', color: '#00ff41' }}>{prefilled}/{total} filled</div>}
+        </div>
+    );
+}
+
+// ── Input styles ──────────────────────────────────────────────────
+const inp = {
+    width: '100%', background: 'rgba(0,10,0,0.8)', border: '1px solid rgba(0,255,65,0.18)',
+    borderRadius: 5, color: '#e0ffe0', fontFamily: 'var(--font-mono)', fontSize: 12,
+    padding: '8px 12px', outline: 'none', boxSizing: 'border-box',
+};
+const sel = { ...inp, cursor: 'pointer' };
+const lbl = { fontSize: 10.5, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', letterSpacing: 0.5, marginBottom: 5, display: 'block' };
+
+function FInput({ label, placeholder, value, onChange, type = 'text' }) {
+    return <div style={{ display: 'flex', flexDirection: 'column' }}><span style={lbl}>{label}</span><input type={type} style={inp} placeholder={placeholder} value={value} onChange={e => onChange(e.target.value)} /></div>;
+}
+function FSelect({ label, options, value, onChange }) {
+    return <div style={{ display: 'flex', flexDirection: 'column' }}><span style={lbl}>{label}</span>
+        <select style={sel} value={value} onChange={e => onChange(e.target.value)}>
+            <option value="">— select —</option>
+            {options.map(o => <option key={o} value={o}>{o}</option>)}
+        </select></div>;
+}
+
+// ─────────────────────────────────────────────────────────────────
+// MAIN COMPONENT
+// ─────────────────────────────────────────────────────────────────
 export default function Evidence() {
-    const [mode, setMode] = useState('text'); // 'text' | 'image'
+    // ── Step state: 'input' | 'user_form' | 'guide' ──────────────
+    const [step, setStep] = useState('input');
     const [text, setText] = useState('');
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
-    const [complaintCopied, setComplaintCopied] = useState(false);
-    const dropRef = useRef(null);
     const fileRef = useRef(null);
+
+    // ── User-fill form state ──────────────────────────────────────
+    const [uf, setUf] = useState({
+        // Incident
+        incidentDate: '', platform: '', delay: '',
+        // Suspect
+        suspectName: '', consent: false,
+        // Complainant
+        title: '', fullName: '', mobile: '', gender: '', dob: '',
+        familyRelation: '', familyName: '',
+        email: '', houseNo: '', street: '', colony: '', city: '',
+        state: '', pincode: '', policeStation: '',
+    });
+    const up = (key, val) => setUf(p => ({ ...p, [key]: val }));
 
     const handleImageDrop = (e) => {
         e.preventDefault();
         const file = e.dataTransfer?.files[0] || e.target?.files[0];
-        if (file && file.type.startsWith('image/')) {
-            setImageFile(file);
-            setImagePreview(URL.createObjectURL(file));
-        }
+        if (file && file.type.startsWith('image/')) { setImageFile(file); setImagePreview(URL.createObjectURL(file)); }
     };
-
-    const toBase64 = (file) => new Promise((res, rej) => {
-        const reader = new FileReader();
-        reader.onload = () => res(reader.result.split(',')[1]);
-        reader.onerror = rej;
-        reader.readAsDataURL(file);
-    });
+    const toBase64 = (file) => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result.split(',')[1]); r.onerror = rej; r.readAsDataURL(file); });
 
     const analyze = async () => {
-        if (mode === 'text' && !text.trim()) return;
-        if (mode === 'image' && !imageFile) return;
-
+        if (!text.trim() && !imageFile) return;
         setLoading(true); setError(null); setResult(null);
         try {
-            let body = {};
-            if (mode === 'image' && imageFile) {
-                const b64 = await toBase64(imageFile);
-                body = { text: text.trim(), image_base64: b64 };
-            } else {
-                body = { text: text.trim() };
-            }
-
+            let body = { text: text.trim() };
+            if (imageFile) body.image_base64 = await toBase64(imageFile);
             const r = await fetch('http://localhost:8000/api/extract-evidence', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
             });
             if (!r.ok) throw new Error(`Server error ${r.status}`);
             const data = await r.json();
             if (data.error) throw new Error(data.error);
             setResult(data);
-        } catch (e) {
-            setError(e.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const downloadComplaint = () => {
-        if (!result?.complaint_draft) return;
-        const blob = new Blob([result.complaint_draft], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `cybercrime_complaint_${Date.now()}.txt`;
-        a.click();
-        URL.revokeObjectURL(url);
-    };
-
-    const generatePDF = () => {
-        if (!result) return;
-        const now = new Date();
-        const dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
-        const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-        const lvlC = { HIGH: '#dc2626', MEDIUM: '#d97706', LOW: '#16a34a' };
-        const color = lvlC[result.level] || '#dc2626';
-
-        const entityRows = [
-            { label: 'UPI IDs', key: 'upi_ids', icon: '💸' },
-            { label: 'Phone Numbers', key: 'phone_numbers', icon: '📞' },
-            { label: 'Suspicious URLs', key: 'urls', icon: '🔗' },
-            { label: 'Payment Amounts', key: 'amounts', icon: '₹' },
-            { label: 'Dates / Times', key: 'dates', icon: '📅' },
-            { label: 'Orgs Impersonated', key: 'names_mentioned', icon: '🏦' },
-            { label: 'Email Addresses', key: 'emails', icon: '📧' },
-        ].map(r => {
-            const items = result.entities?.[r.key] || [];
-            return `<tr>
-              <td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;font-weight:600;color:#374151;width:170px;vertical-align:top">
-                ${r.icon} ${r.label}
-              </td>
-              <td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;color:${items.length ? '#111827' : '#9ca3af'};font-family:monospace;font-size:12px;word-break:break-all">
-                ${items.length ? items.join(' &nbsp;|&nbsp; ') : '<em>Not found</em>'}
-              </td>
-              <td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;text-align:center;font-weight:700;color:${items.length ? '#16a34a' : '#9ca3af'}">
-                ${items.length}
-              </td>
-            </tr>`;
-        }).join('');
-
-        const patternRows = (result.matched_patterns || []).map(p =>
-            `<li style="margin:4px 0;color:#374151">${p}</li>`
-        ).join('') || '<li style="color:#9ca3af">No specific patterns matched</li>';
-
-        const html = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>FinGuard AI — Cybercrime Evidence Report</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', sans-serif; color: #111827; background: #fff; font-size: 13px; line-height: 1.6; }
-    @page { margin: 18mm 16mm; size: A4; }
-    @media print { .no-print { display: none !important; } body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
-
-    /* ---- HEADER ---- */
-    .header { background: #0a0a0a; color: white; padding: 28px 32px; display: flex; align-items: center; justify-content: space-between; border-radius: 0; }
-    .brand { display: flex; align-items: center; gap: 14px; }
-    .shield { font-size: 40px; }
-    .brand-text h1 { font-size: 22px; font-weight: 900; letter-spacing: 2px; color: #00ff41; text-shadow: 0 0 20px rgba(0,255,65,0.5); }
-    .brand-text p { font-size: 9px; color: #6b7280; letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
-    .header-meta { text-align: right; font-size: 11px; color: #6b7280; line-height: 1.8; font-family: 'JetBrains Mono', monospace; }
-    .header-meta strong { color: #00ff41; }
-
-    /* ---- RISK BANNER ---- */
-    .risk-banner { display: flex; align-items: center; gap: 24px; padding: 20px 32px; background: ${color}0d; border-left: 5px solid ${color}; margin: 0; }
-    .risk-score { font-size: 56px; font-weight: 900; color: ${color}; font-family: 'JetBrains Mono', monospace; line-height: 1; }
-    .risk-info h2 { font-size: 20px; font-weight: 800; color: ${color}; letter-spacing: 2px; text-transform: uppercase; }
-    .risk-info .cat { display: inline-block; background: #f3f4f6; border: 1px solid #d1d5db; padding: 3px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; color: #374151; margin-top: 6px; }
-    .risk-info .sub { font-size: 11px; color: #6b7280; margin-top: 4px; }
-    .entity-count { margin-left: auto; text-align: center; }
-    .entity-count .num { font-size: 42px; font-weight: 900; color: #111827; font-family: 'JetBrains Mono', monospace; line-height: 1; }
-    .entity-count .lbl { font-size: 9px; color: #6b7280; text-transform: uppercase; letter-spacing: 2px; }
-
-    /* ---- SECTIONS ---- */
-    .section { padding: 20px 32px; border-bottom: 1px solid #e5e7eb; }
-    .section-title { font-size: 11px; font-weight: 800; color: #374151; text-transform: uppercase; letter-spacing: 2.5px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-    .section-title::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
-
-    /* ---- MESSAGE BOX ---- */
-    .msg-box { background: #faf9f9; border: 1px solid #e5e7eb; border-left: 4px solid #dc2626; border-radius: 4px; padding: 14px 16px; font-size: 12.5px; color: #374151; font-family: 'JetBrains Mono', monospace; line-height: 1.8; white-space: pre-wrap; word-break: break-word; }
-
-    /* ---- EVIDENCE TABLE ---- */
-    .evidence-table { width: 100%; border-collapse: collapse; border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden; font-size: 12.5px; }
-    .evidence-table thead tr { background: #111827; color: white; }
-    .evidence-table thead th { padding: 10px 14px; text-align: left; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; }
-
-    /* ---- EXPLANATION ---- */
-    .explanation { background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 4px solid #16a34a; border-radius: 4px; padding: 14px 16px; font-size: 13px; color: #166534; font-style: italic; line-height: 1.8; }
-
-    /* ---- COMPLAINT ---- */
-    .complaint { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 18px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: #111827; line-height: 1.9; white-space: pre-wrap; word-break: break-word; }
-
-    /* ---- FOOTER ---- */
-    .footer { background: #0a0a0a; color: white; padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; font-size: 11px; }
-    .footer .helpline { font-size: 20px; font-weight: 900; color: #ff3b5c; font-family: 'JetBrains Mono', monospace; }
-    .footer .right { text-align: right; color: #6b7280; line-height: 1.8; }
-
-    /* ---- PRINT BTN ---- */
-    .print-bar { background: #0a0a0a; padding: 14px 32px; display: flex; gap: 12px; align-items: center; position: sticky; top: 0; z-index: 99; }
-    .btn { padding: 9px 22px; border: none; border-radius: 4px; cursor: pointer; font-weight: 700; font-size: 12px; letter-spacing: 1px; font-family: 'Inter', sans-serif; }
-    .btn-print { background: #00ff41; color: #000; }
-    .btn-close { background: transparent; color: #6b7280; border: 1px solid #374151; }
-    .btn-close:hover { color: #fff; }
-    .print-hint { color: #6b7280; font-size: 11px; }
-  </style>
-</head>
-<body>
-
-  <!-- Print bar (hidden when printing) -->
-  <div class="print-bar no-print">
-    <button class="btn btn-print" onclick="window.print()">🖨️ SAVE AS PDF / PRINT</button>
-    <button class="btn btn-close" onclick="window.close()">✕ Close</button>
-    <span class="print-hint">In the print dialog → Destination → "Save as PDF"</span>
-  </div>
-
-  <!-- HEADER -->
-  <div class="header">
-    <div class="brand">
-      <div class="shield">🛡️</div>
-      <div class="brand-text">
-        <h1>FINGUARD AI</h1>
-        <p>Cybercrime Evidence Report</p>
-      </div>
-    </div>
-    <div class="header-meta">
-      Generated: <strong>${dateStr}, ${timeStr} IST</strong><br>
-      Report ID: <strong>FG-${Date.now().toString(36).toUpperCase()}</strong><br>
-      Classification: <strong style="color:#ef4444">CONFIDENTIAL</strong>
-    </div>
-  </div>
-
-  <!-- RISK BANNER -->
-  <div class="risk-banner">
-    <div class="risk-score">${result.score}</div>
-    <div class="risk-info">
-      <h2>${result.level} RISK</h2>
-      <div class="cat">📂 ${result.category}</div>
-      <div class="sub">Risk score out of 100 · ${result.score >= 61 ? 'Immediate action recommended' : result.score >= 31 ? 'Exercise caution' : 'Low threat level'}</div>
-    </div>
-    <div class="entity-count">
-      <div class="num">${result.entity_count}</div>
-      <div class="lbl">Forensic Entities<br>Identified</div>
-    </div>
-  </div>
-
-  <!-- ORIGINAL MESSAGE -->
-  <div class="section">
-    <div class="section-title">📱 Original Suspicious Message</div>
-    <div class="msg-box">${(text || result.ocr_text || 'Message not available').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
-  </div>
-
-  <!-- EXTRACTED EVIDENCE TABLE -->
-  <div class="section">
-    <div class="section-title">🔍 Extracted Forensic Evidence</div>
-    <table class="evidence-table">
-      <thead>
-        <tr>
-          <th style="width:170px">Entity Type</th>
-          <th>Values Found</th>
-          <th style="width:70px;text-align:center">Count</th>
-        </tr>
-      </thead>
-      <tbody>${entityRows}</tbody>
-    </table>
-  </div>
-
-  <!-- PATTERN MATCHES -->
-  <div class="section">
-    <div class="section-title">⚠️ Pattern Signatures Matched</div>
-    <ul style="padding-left:20px;column-count:2;column-gap:20px">
-      ${patternRows}
-    </ul>
-  </div>
-
-  <!-- AI EXPLANATION -->
-  <div class="section">
-    <div class="section-title">🤖 AI Fraud Analysis</div>
-    <div class="explanation">"${(result.explanation || '').replace(/</g, '&lt;')}"</div>
-    <p style="font-size:10px;color:#9ca3af;margin-top:6px">Analysis powered by: ${result.powered_by || 'FinGuard Rule Engine'}</p>
-  </div>
-
-  <!-- COMPLAINT DRAFT -->
-  <div class="section" style="border-bottom:none">
-    <div class="section-title">🧾 Cybercrime Complaint Draft</div>
-    <div class="complaint">${(result.complaint_draft || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
-    <p style="font-size:10px;color:#9ca3af;margin-top:8px;font-style:italic">
-      ⚠️ Fill in all [BRACKETED] placeholders before submitting. This draft is auto-generated and should be reviewed before filing.
-    </p>
-  </div>
-
-  <!-- FOOTER -->
-  <div class="footer">
-    <div>
-      <div style="color:#6b7280;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">National Cyber Crime Helpline</div>
-      <div class="helpline">1930</div>
-      <div style="color:#6b7280;font-size:11px;margin-top:2px">cybercrime.gov.in · Available 24×7</div>
-    </div>
-    <div class="right">
-      <div style="color:#00ff41;font-size:11px;font-weight:700;margin-bottom:4px">FinGuard AI</div>
-      <div>Report generated on ${dateStr}</div>
-      <div style="color:#374151;font-weight:600">This document is for official use only</div>
-    </div>
-  </div>
-
-</body>
-</html>`;
-
-        const win = window.open('', '_blank', 'width=900,height=700');
-        win.document.write(html);
-        win.document.close();
+            // Pre-fill user form from extracted data where possible
+            const pg = data.portal_guide;
+            setUf(p => ({
+                ...p,
+                incidentDate: pg?.section1?.fields?.incident_date?.value || '',
+                platform: pg?.section1?.fields?.platform?.value || '',
+            }));
+            setStep('user_form');
+        } catch (e) { setError(e.message); }
+        finally { setLoading(false); }
     };
 
     const lvlColor = { HIGH: '#ff3b5c', MEDIUM: '#ffcc00', LOW: '#00ff41' };
+    const pg = result?.portal_guide;
 
+    // Merge portal guide fields with user-provided data
+    const mergedGuide = pg ? {
+        section1: {
+            ...pg.section1,
+            fields: {
+                ...pg.section1.fields,
+                incident_date: uf.incidentDate
+                    ? { ...pg.section1.fields.incident_date, value: uf.incidentDate, status: 'user_provided' }
+                    : pg.section1.fields.incident_date,
+                platform: uf.platform && uf.platform !== pg.section1.fields.platform?.value
+                    ? { ...pg.section1.fields.platform, value: uf.platform, status: 'user_provided' }
+                    : pg.section1.fields.platform,
+                delay_in_reporting: uf.delay
+                    ? { ...pg.section1.fields.delay_in_reporting, value: uf.delay, status: 'user_provided' }
+                    : pg.section1.fields.delay_in_reporting,
+            },
+        },
+        section2: {
+            ...pg.section2,
+            fields: {
+                ...pg.section2.fields,
+                consent: { ...pg.section2.fields.consent, value: uf.consent ? '☑ Checkbox ticked — consent given' : 'Tick the checkbox', status: uf.consent ? 'user_provided' : 'user_fill' },
+                suspect_name: { ...pg.section2.fields.suspect_name, value: uf.suspectName || 'Unknown', status: uf.suspectName ? 'user_provided' : 'user_fill' },
+            },
+        },
+        section3: {
+            ...pg.section3,
+            fields: {
+                title: { label: 'Title', value: uf.title, status: uf.title ? 'user_provided' : 'user_fill' },
+                name: { label: 'Full Name', value: uf.fullName, status: uf.fullName ? 'user_provided' : 'user_fill' },
+                mobile: { label: 'Mobile Number', value: uf.mobile, status: uf.mobile ? 'user_provided' : 'user_fill' },
+                gender: { label: 'Gender', value: uf.gender, status: uf.gender ? 'user_provided' : 'user_fill' },
+                dob: { label: 'Date of Birth', value: uf.dob, status: uf.dob ? 'user_provided' : 'user_fill' },
+                family_member: { label: 'Family Member', value: uf.familyRelation && uf.familyName ? `${uf.familyRelation}: ${uf.familyName}` : '', status: uf.familyName ? 'user_provided' : 'user_fill' },
+                email: { label: 'Email ID', value: uf.email, status: uf.email ? 'user_provided' : 'user_fill' },
+                address: { label: 'Address', value: [uf.houseNo, uf.street, uf.colony, uf.city, uf.state, uf.pincode].filter(Boolean).join(', '), status: uf.city ? 'user_provided' : 'user_fill' },
+                police_station: { label: 'Police Station', value: uf.policeStation, status: uf.policeStation ? 'user_provided' : 'user_fill' },
+                relationship: { label: 'Relationship', value: 'Self', status: 'user_provided' },
+                national_id: { label: 'National ID Upload', value: 'Upload JPG/PNG/PDF (max 5 MB) on the portal', status: 'user_fill' },
+            },
+        },
+        summary: pg.summary,
+    } : null;
 
+    const totalProvided = mergedGuide ? Object.values({ ...(mergedGuide.section1?.fields || {}), ...(mergedGuide.section2?.fields || {}), ...(mergedGuide.section3?.fields || {}) }).filter(f => f.status === 'user_provided' || f.status === 'prefilled').length : 0;
+
+    // ─────────────────────────────────────────────────────────────
+    // RENDER
+    // ─────────────────────────────────────────────────────────────
     return (
         <div>
             <div className="page-header">
                 <div className="page-label">🧾 AI-Powered Legal Tool</div>
-                <h1 className="page-title">
-                    Evidence <span className="highlight">Structuring Assistant</span>
-                </h1>
-                <p className="page-subtitle">
-                    Upload a screenshot or paste a suspicious message. We extract all forensic entities and generate a ready-to-file cybercrime complaint draft.
-                </p>
+                <h1 className="page-title">Evidence <span className="highlight">Structuring Assistant</span></h1>
+                <p className="page-subtitle">Paste a suspicious message + optional screenshot. We extract evidence, ask for a few details, and pre-fill the entire cybercrime.gov.in complaint form.</p>
             </div>
 
-            {/* ===== INPUT AREA ===== */}
-            <div className="card" style={{ padding: 28, marginBottom: 24 }}>
+            {/* ── STEP INDICATOR ────────────────────────────────── */}
+            <div style={{ display: 'flex', gap: 0, marginBottom: 24, borderRadius: 8, overflow: 'hidden', border: '1px solid rgba(0,255,65,0.12)' }}>
+                {[['📝', 'Step 1', 'Paste & Extract', 'input'], ['📋', 'Step 2', 'Add Your Details', 'user_form'], ['🏛️', 'Step 3', 'Portal Guide', 'guide']].map(([icon, stepNum, label, id]) => {
+                    const active = step === id;
+                    const done = (id === 'input' && (step === 'user_form' || step === 'guide')) || (id === 'user_form' && step === 'guide');
+                    return (
+                        <div key={id} style={{ flex: 1, padding: '12px 16px', background: active ? 'rgba(0,255,65,0.07)' : done ? 'rgba(0,255,65,0.03)' : 'transparent', borderRight: '1px solid rgba(0,255,65,0.12)', display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <div style={{ fontSize: 18 }}>{done ? '✅' : icon}</div>
+                            <div>
+                                <div style={{ fontSize: 9, color: active ? '#00ff41' : 'var(--text-muted)', letterSpacing: 1.5, textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}>{stepNum}</div>
+                                <div style={{ fontSize: 12, color: active ? '#fff' : done ? 'rgba(255,255,255,0.5)' : 'var(--text-muted)', fontWeight: active ? 700 : 400 }}>{label}</div>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
 
-                {/* Mode Toggle */}
-                <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-                    {[
-                        { id: 'text', icon: '📝', label: 'Paste Message' },
-                        { id: 'image', icon: '🖼️', label: 'Upload Screenshot' },
-                    ].map(m => (
-                        <button
-                            key={m.id}
-                            onClick={() => setMode(m.id)}
-                            style={{
-                                background: mode === m.id ? 'rgba(0,255,65,0.1)' : 'transparent',
-                                border: `1px solid ${mode === m.id ? 'rgba(0,255,65,0.4)' : 'rgba(0,255,65,0.12)'}`,
-                                color: mode === m.id ? '#00ff41' : 'var(--text-muted)',
-                                padding: '8px 18px', borderRadius: 4, cursor: 'pointer',
-                                fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 1,
-                                textShadow: mode === m.id ? '0 0 8px rgba(0,255,65,0.5)' : 'none',
-                                transition: 'all 0.2s',
-                            }}
-                        >
-                            {m.icon} {m.label}
-                        </button>
-                    ))}
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: mode === 'image' ? '1fr 1fr' : '1fr', gap: 20 }}>
-                    {/* Text Input */}
-                    <div>
-                        <div className="input-label">📋 {mode === 'image' ? 'Additional text context (optional)' : 'Paste suspicious message / conversation'}</div>
-                        <textarea
-                            className="message-textarea"
-                            placeholder={mode === 'text'
-                                ? 'Paste any suspicious SMS, WhatsApp, or email text here...\n\nTip: Include the full message with all numbers and links visible.'
-                                : 'Optional: add any extra context...'}
-                            value={text}
-                            onChange={e => setText(e.target.value)}
-                            rows={mode === 'image' ? 6 : 8}
-                            style={{ minHeight: mode === 'image' ? 130 : 180 }}
-                        />
-
-                        {/* Sample chips for text mode */}
-                        {mode === 'text' && (
+            {/* ═══════════════ STEP 1: Input ═══════════════════════ */}
+            {step === 'input' && (
+                <div className="card" style={{ padding: 28, marginBottom: 24 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+                        <div>
+                            <div className="input-label">📋 Paste suspicious message / conversation</div>
+                            <textarea className="message-textarea" value={text} onChange={e => setText(e.target.value)} rows={9} style={{ minHeight: 200 }}
+                                placeholder={'Paste any suspicious SMS, WhatsApp, or email text here...\n\nTip: Include the full message with all numbers and links visible.'} />
                             <div style={{ marginTop: 10 }}>
                                 <div className="samples-label">Try sample evidence</div>
-                                <div className="sample-chips">
-                                    {SAMPLES.map(s => (
-                                        <button key={s.label} className="sample-chip" onClick={() => setText(s.text)}>{s.label}</button>
-                                    ))}
-                                </div>
+                                <div className="sample-chips">{SAMPLES.map(s => <button key={s.label} className="sample-chip" onClick={() => setText(s.text)}>{s.label}</button>)}</div>
                             </div>
-                        )}
-                    </div>
-
-                    {/* Image Upload */}
-                    {mode === 'image' && (
+                        </div>
                         <div>
-                            <div className="input-label">📸 Screenshot / Image</div>
-                            <div
-                                ref={dropRef}
-                                onClick={() => fileRef.current?.click()}
-                                onDrop={handleImageDrop}
-                                onDragOver={e => e.preventDefault()}
-                                style={{
-                                    border: `2px dashed ${imagePreview ? 'rgba(0,255,65,0.4)' : 'rgba(0,255,65,0.15)'}`,
-                                    borderRadius: 4, cursor: 'pointer', overflow: 'hidden',
-                                    height: 180, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    background: 'rgba(0,5,0,0.8)', position: 'relative',
-                                    transition: 'border-color 0.2s',
-                                }}
-                            >
-                                {imagePreview ? (
-                                    <img src={imagePreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                                ) : (
+                            <div className="input-label">📸 Upload Screenshot <span style={{ marginLeft: 8, fontSize: 10, color: 'var(--text-muted)', fontWeight: 'normal', fontFamily: 'var(--font-mono)' }}>optional</span></div>
+                            <div onClick={() => fileRef.current?.click()} onDrop={handleImageDrop} onDragOver={e => e.preventDefault()}
+                                style={{ border: `2px dashed ${imagePreview ? 'rgba(0,255,65,0.4)' : 'rgba(0,255,65,0.15)'}`, borderRadius: 6, cursor: 'pointer', overflow: 'hidden', height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,5,0,0.8)', transition: 'border-color 0.2s' }}>
+                                {imagePreview ? <img src={imagePreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : (
                                     <div style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
-                                        <div style={{ fontSize: 32, marginBottom: 8 }}>📂</div>
-                                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 1 }}>
-                                            Drop screenshot here<br />or click to browse
-                                        </div>
-                                        <div style={{ fontSize: 10, marginTop: 6, opacity: 0.5 }}>JPG, PNG, WEBP</div>
+                                        <div style={{ fontSize: 36, marginBottom: 10 }}>📂</div>
+                                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 1 }}>Drop screenshot here<br />or click to browse</div>
+                                        <div style={{ fontSize: 10, marginTop: 6, opacity: 0.5 }}>JPG · PNG · WEBP</div>
                                     </div>
                                 )}
                                 <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageDrop} />
                             </div>
-                            {imagePreview && (
-                                <button onClick={() => { setImageFile(null); setImagePreview(null); }}
-                                    style={{ background: 'none', border: 'none', color: '#ff8fa3', cursor: 'pointer', fontSize: 11, fontFamily: 'var(--font-mono)', marginTop: 6 }}>
-                                    ✕ Remove image
-                                </button>
-                            )}
-                            <div style={{ marginTop: 8, fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                                🤖 Gemini Vision will OCR the screenshot and extract all text automatically.
+                            {imagePreview && <button onClick={() => { setImageFile(null); setImagePreview(null); }} style={{ background: 'none', border: 'none', color: '#ff8fa3', cursor: 'pointer', fontSize: 11, fontFamily: 'var(--font-mono)', marginTop: 8 }}>✕ Remove image</button>}
+                            <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                <div style={{ padding: '8px 12px', background: 'rgba(0,255,65,0.04)', border: '1px solid rgba(0,255,65,0.12)', borderRadius: 6, fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.6 }}>🔒 <strong style={{ color: '#00ff41' }}>Analysis</strong> — DeepSeek R1 (local, private)</div>
+                                <div style={{ padding: '8px 12px', background: 'rgba(0,255,255,0.03)', border: '1px solid rgba(0,255,255,0.1)', borderRadius: 6, fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.6 }}>👁️ <strong style={{ color: '#00ffff' }}>OCR</strong> — Gemini Vision (screenshot to text only)</div>
                             </div>
                         </div>
-                    )}
-                </div>
-
-                {error && <div className="error-box" style={{ marginTop: 14 }}>⚠️ {error}</div>}
-
-                <div style={{ display: 'flex', gap: 12, marginTop: 20, alignItems: 'center' }}>
-                    <div className="analyze-btn-wrap" style={{ flex: 1, maxWidth: 300 }}>
-                        <div className="analyze-btn-glow" />
-                        <button className="analyze-btn" onClick={analyze}
-                            disabled={loading || (mode === 'text' && !text.trim()) || (mode === 'image' && !imageFile && !text.trim())}
-                            style={{ fontSize: 12, padding: '13px' }}>
-                            {loading
-                                ? <><span className="spinner" /> Extracting evidence...</>
-                                : <>🔬 Extract Evidence &amp; Generate Complaint</>}
-                        </button>
                     </div>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                        Powered by regex extraction + Gemini AI complaint generation.<br />
-                        Data never stored or shared.
-                    </div>
-                </div>
-            </div>
-
-            {/* ===== EMPTY STATE ===== */}
-            {!result && !loading && (
-                <div style={{ textAlign: 'center', padding: '50px 0', color: 'var(--text-muted)' }}>
-                    <div style={{ fontSize: 52, marginBottom: 14 }}>🧾</div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-secondary)' }}>Evidence Lab Ready</div>
-                    <div style={{ fontSize: 12, marginTop: 10, lineHeight: 1.8, maxWidth: 400, margin: '10px auto 0' }}>
-                        Paste a suspicious message or upload a screenshot.<br />
-                        We'll extract all forensic entities and generate a cybercrime complaint draft you can file at <strong style={{ color: '#00ffff' }}>cybercrime.gov.in</strong> or your local police.
+                    {error && <div className="error-box" style={{ marginTop: 14 }}>⚠️ {error}</div>}
+                    <div style={{ display: 'flex', gap: 12, marginTop: 22, alignItems: 'center' }}>
+                        <div className="analyze-btn-wrap" style={{ flex: 1, maxWidth: 360 }}>
+                            <div className="analyze-btn-glow" />
+                            <button className="analyze-btn" onClick={analyze} disabled={loading || (!text.trim() && !imageFile)} style={{ fontSize: 12, padding: '13px' }}>
+                                {loading ? <><span className="spinner" /> Extracting evidence...</> : <>🔬 Extract Evidence — Step 1 of 3</>}
+                            </button>
+                        </div>
+                        <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.7 }}>Extracts entities · Pre-fills portal fields<br />Your data never leaves your machine.</div>
                     </div>
                 </div>
             )}
 
-            {/* ===== RESULTS ===== */}
-            {result && (
+            {/* ═══════════════ STEP 2: User Details Form ═══════════ */}
+            {step === 'user_form' && result && (
                 <>
-                    {/* OCR Notice */}
-                    {result.ocr_text && (
-                        <div className="card" style={{ padding: '14px 20px', marginBottom: 16, background: 'rgba(0,255,255,0.03)', borderColor: 'rgba(0,255,255,0.15)' }}>
-                            <div style={{ fontSize: 10, letterSpacing: 2, color: '#00ffff', fontWeight: 700, textTransform: 'uppercase', marginBottom: 6 }}>
-                                🤖 Gemini Vision OCR Extracted Text
+                    {/* Small extraction result summary */}
+                    <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+                        {[
+                            { label: 'Risk Score', val: `${result.score}/100`, color: lvlColor[result.level] },
+                            { label: 'Category', val: result.category, color: '#00ffff' },
+                            { label: 'Entities', val: `${result.entity_count} found`, color: '#00ff41' },
+                            { label: 'AI', val: result.powered_by?.includes('DeepSeek') ? '🔒 DeepSeek' : '✨ Gemini', color: 'rgba(255,255,255,0.6)' },
+                        ].map(b => (
+                            <div key={b.label} style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 6 }}>
+                                <div style={{ fontSize: 9, color: 'var(--text-muted)', letterSpacing: 1.5, textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}>{b.label}</div>
+                                <div style={{ fontSize: 13, fontWeight: 700, color: b.color, fontFamily: 'var(--font-mono)' }}>{b.val}</div>
                             </div>
-                            <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
-                                {result.ocr_text}
-                            </div>
-                        </div>
-                    )}
+                        ))}
+                        <button onClick={() => { setStep('input'); setResult(null); }} style={{ marginLeft: 'auto', background: 'none', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-muted)', borderRadius: 6, padding: '8px 14px', cursor: 'pointer', fontSize: 11, fontFamily: 'var(--font-mono)' }}>← Re-extract</button>
+                    </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: 20 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
 
-                        {/* ===== LEFT: Entities + Analysis ===== */}
+                        {/* ── LEFT: Incident + Suspect ── */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-                            {/* Risk badge */}
-                            <div className="card" style={{
-                                padding: '18px 22px',
-                                background: `${lvlColor[result.level] || '#00ff41'}08`,
-                                borderColor: `${lvlColor[result.level] || '#00ff41'}30`,
-                                display: 'flex', alignItems: 'center', gap: 20
-                            }}>
-                                <div>
-                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 48, fontWeight: 700, color: lvlColor[result.level], lineHeight: 1, textShadow: `0 0 20px ${lvlColor[result.level]}60` }}>
-                                        {result.score}
+                            {/* Section 1 user fields */}
+                            <div className="card" style={{ padding: 22 }}>
+                                <div style={{ fontSize: 11, fontWeight: 700, color: '#00ffff', letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 16 }}>📅 Section 1 — Incident Details</div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                                    <FSelect label="Delay in Reporting *" options={['Yes', 'No']} value={uf.delay} onChange={v => up('delay', v)} />
+                                    <FInput label="Incident Date (if you know it)" placeholder="e.g. 03/03/2026" value={uf.incidentDate} onChange={v => up('incidentDate', v)} />
+                                    <FSelect label="Platform / Where it happened" options={PLATFORMS} value={uf.platform} onChange={v => up('platform', v)} />
+                                </div>
+                            </div>
+
+                            {/* Section 2 user fields */}
+                            <div className="card" style={{ padding: 22 }}>
+                                <div style={{ fontSize: 11, fontWeight: 700, color: '#00ffff', letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 16 }}>🕵️ Section 2 — Suspect Details</div>
+
+                                {/* Show extracted identifiers */}
+                                {pg.section2.identifiers.length > 0 && (
+                                    <div style={{ marginBottom: 16, padding: '10px 14px', background: 'rgba(0,255,65,0.04)', border: '1px solid rgba(0,255,65,0.15)', borderRadius: 6 }}>
+                                        <div style={{ fontSize: 10, color: '#00ff41', fontFamily: 'var(--font-mono)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>✓ {pg.section2.identifiers.length} Identifiers Extracted Automatically</div>
+                                        {pg.section2.identifiers.map((id, i) => (
+                                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                                                <span style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: '#00ffff', background: 'rgba(0,255,255,0.08)', border: '1px solid rgba(0,255,255,0.2)', borderRadius: 3, padding: '2px 7px', whiteSpace: 'nowrap' }}>{id.type}</span>
+                                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#00ff41', flex: 1, wordBreak: 'break-all' }}>{id.value}</span>
+                                                <CopyBtn text={id.value} />
+                                            </div>
+                                        ))}
                                     </div>
+                                )}
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                                    <FInput label="Suspect Name (if known)" placeholder="Leave blank if unknown" value={uf.suspectName} onChange={v => up('suspectName', v)} />
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', padding: '10px 12px', background: 'rgba(0,255,65,0.03)', border: '1px solid rgba(0,255,65,0.12)', borderRadius: 5 }}>
+                                        <input type="checkbox" checked={uf.consent} onChange={e => up('consent', e.target.checked)} style={{ width: 16, height: 16, accentColor: '#00ff41' }} />
+                                        <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', lineHeight: 1.5 }}>
+                                            I consent to share suspect information with investigating agencies
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* ── RIGHT: Complainant Details ── */}
+                        <div className="card" style={{ padding: 22 }}>
+                            <div style={{ fontSize: 11, fontWeight: 700, color: '#00ffff', letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 4 }}>👤 Section 3 — Your Details (Complainant)</div>
+                            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 16, lineHeight: 1.5 }}>
+                                Fill what you can — more you provide, the more complete your portal guide will be.
+                                <span style={{ color: 'rgba(0,255,65,0.6)', marginLeft: 4 }}>All optional for the guide.</span>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: 10 }}>
+                                    <FSelect label="Title" options={TITLES} value={uf.title} onChange={v => up('title', v)} />
+                                    <FInput label="Full Name" placeholder="Your full name" value={uf.fullName} onChange={v => up('fullName', v)} />
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                                    <FInput label="Mobile Number" placeholder="10-digit mobile" value={uf.mobile} onChange={v => up('mobile', v)} />
+                                    <FSelect label="Gender" options={GENDERS} value={uf.gender} onChange={v => up('gender', v)} />
+                                </div>
+                                <FInput label="Date of Birth" type="date" placeholder="" value={uf.dob} onChange={v => up('dob', v)} />
+                                <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: 10 }}>
+                                    <FSelect label="Family Member" options={RELATIONS} value={uf.familyRelation} onChange={v => up('familyRelation', v)} />
+                                    <FInput label="Their Name" placeholder="Name" value={uf.familyName} onChange={v => up('familyName', v)} />
+                                </div>
+                                <FInput label="Email Address" placeholder="your@email.com" value={uf.email} onChange={v => up('email', v)} />
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                                    <FInput label="House No / Flat" placeholder="" value={uf.houseNo} onChange={v => up('houseNo', v)} />
+                                    <FInput label="Street Name" placeholder="" value={uf.street} onChange={v => up('street', v)} />
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                                    <FInput label="Colony / Area" placeholder="" value={uf.colony} onChange={v => up('colony', v)} />
+                                    <FInput label="City / Town" placeholder="" value={uf.city} onChange={v => up('city', v)} />
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px', gap: 10 }}>
+                                    <FInput label="State" placeholder="" value={uf.state} onChange={v => up('state', v)} />
+                                    <FInput label="Pincode" placeholder="" value={uf.pincode} onChange={v => up('pincode', v)} />
+                                </div>
+                                <FInput label="Nearest Police Station" placeholder="e.g. Koramangala PS" value={uf.policeStation} onChange={v => up('policeStation', v)} />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Generate guide button */}
+                    <div style={{ marginTop: 20, display: 'flex', gap: 12, alignItems: 'center' }}>
+                        <div className="analyze-btn-wrap" style={{ flex: 1, maxWidth: 380 }}>
+                            <div className="analyze-btn-glow" />
+                            <button className="analyze-btn" onClick={() => setStep('guide')} style={{ fontSize: 12, padding: '13px', background: 'linear-gradient(135deg,rgba(0,255,65,0.15),rgba(0,255,200,0.08))' }}>
+                                🏛️ Generate Complete Portal Filing Guide — Step 3
+                            </button>
+                        </div>
+                        <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.7 }}>
+                            All unfilled fields will be marked<br />"fill manually" on the portal.
+                        </div>
+                    </div>
+                </>
+            )}
+
+            {/* ═══════════════ STEP 3: Complete Portal Guide ═══════ */}
+            {step === 'guide' && result && mergedGuide && (
+                <>
+                    {/* Header bar */}
+                    <div style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '14px 18px', background: 'rgba(0,255,65,0.04)', border: '1px solid rgba(0,255,65,0.15)', borderRadius: 8, marginBottom: 20 }}>
+                        <div style={{ fontSize: 22 }}>🏛️</div>
+                        <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: 12, fontWeight: 700, color: '#00ff41', letterSpacing: 0.5 }}>Complete cybercrime.gov.in Filing Guide</div>
+                            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                                <span style={{ color: '#00ff41', fontWeight: 700 }}>{totalProvided} fields filled</span>
+                                {' · '}
+                                <span style={{ color: '#00cfff' }}>{mergedGuide.summary.identifiers_found} suspect identifier(s)</span>
+                                {' · '}
+                                <span>Green = auto-filled / you provided · Blue = you provided · Dashed = fill on portal</span>
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                            <button onClick={() => setStep('user_form')} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text-muted)', borderRadius: 5, padding: '7px 12px', cursor: 'pointer', fontSize: 11, fontFamily: 'var(--font-mono)' }}>← Edit Details</button>
+                            <a href="https://cybercrime.gov.in" target="_blank" rel="noopener noreferrer"
+                                style={{ padding: '7px 14px', background: 'rgba(0,255,65,0.12)', border: '1px solid rgba(0,255,65,0.35)', borderRadius: 5, color: '#00ff41', fontSize: 11, fontFamily: 'var(--font-mono)', fontWeight: 700, letterSpacing: 0.5, textDecoration: 'none', whiteSpace: 'nowrap', boxShadow: '0 0 10px rgba(0,255,65,0.15)' }}>
+                                Open Portal ↗
+                            </a>
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.05fr', gap: 20 }}>
+
+                        {/* ── LEFT: Entities + AI ── */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+                            {/* Risk */}
+                            <div className="card" style={{ padding: '18px 22px', background: `${lvlColor[result.level] || '#00ff41'}08`, borderColor: `${lvlColor[result.level] || '#00ff41'}30`, display: 'flex', alignItems: 'center', gap: 20 }}>
+                                <div>
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 48, fontWeight: 700, color: lvlColor[result.level], lineHeight: 1, textShadow: `0 0 20px ${lvlColor[result.level]}60` }}>{result.score}</div>
                                     <div style={{ fontSize: 9, color: 'var(--text-muted)', letterSpacing: 2, textTransform: 'uppercase', marginTop: 4 }}>Risk Score</div>
                                 </div>
                                 <div>
-                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 700, color: lvlColor[result.level], letterSpacing: 2, textTransform: 'uppercase' }}>
-                                        {result.level} RISK
-                                    </div>
-                                    <span style={{ background: 'rgba(0,255,255,0.06)', border: '1px solid rgba(0,255,255,0.2)', borderRadius: 3, padding: '4px 10px', fontSize: 11, color: '#00ffff', fontFamily: 'var(--font-mono)', letterSpacing: 1, textTransform: 'uppercase', marginTop: 8, display: 'inline-block' }}>
-                                        {result.category}
-                                    </span>
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 700, color: lvlColor[result.level], letterSpacing: 2, textTransform: 'uppercase' }}>{result.level} RISK</div>
+                                    <span style={{ background: 'rgba(0,255,255,0.06)', border: '1px solid rgba(0,255,255,0.2)', borderRadius: 3, padding: '4px 10px', fontSize: 11, color: '#00ffff', fontFamily: 'var(--font-mono)', letterSpacing: 1, textTransform: 'uppercase', marginTop: 8, display: 'inline-block' }}>{result.category}</span>
                                 </div>
                                 <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
-                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 28, fontWeight: 700, color: '#00ff41', textShadow: '0 0 12px rgba(0,255,65,0.4)' }}>
-                                        {result.entity_count}
-                                    </div>
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 28, fontWeight: 700, color: '#00ff41', textShadow: '0 0 12px rgba(0,255,65,0.4)' }}>{result.entity_count}</div>
                                     <div style={{ fontSize: 9, color: 'var(--text-muted)', letterSpacing: 1.5, textTransform: 'uppercase' }}>Entities Found</div>
                                 </div>
                             </div>
 
-                            {/* Extracted Entities */}
+                            {/* Entities */}
                             <div className="card" style={{ padding: '22px' }}>
                                 <div className="section-title">🔍 Extracted Forensic Evidence</div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -516,95 +445,84 @@ export default function Evidence() {
                                         return (
                                             <div key={cfg.key} style={{ borderBottom: '1px solid rgba(0,255,65,0.05)', paddingBottom: 10 }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                                                    <span style={{ fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase', color: cfg.color, fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
-                                                        {cfg.icon} {cfg.label}
-                                                    </span>
-                                                    <span style={{ fontSize: 10, color: items.length > 0 ? cfg.color : 'var(--text-muted)', background: items.length > 0 ? `${cfg.color}12` : 'transparent', padding: '1px 7px', borderRadius: 2, fontFamily: 'var(--font-mono)', border: items.length > 0 ? `1px solid ${cfg.color}25` : 'none' }}>
-                                                        {items.length} found
-                                                    </span>
+                                                    <span style={{ fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase', color: cfg.color, fontWeight: 700, fontFamily: 'var(--font-mono)' }}>{cfg.icon} {cfg.label}</span>
+                                                    <span style={{ fontSize: 10, color: items.length > 0 ? cfg.color : 'var(--text-muted)', background: items.length > 0 ? `${cfg.color}12` : 'transparent', padding: '1px 7px', borderRadius: 2, fontFamily: 'var(--font-mono)', border: items.length > 0 ? `1px solid ${cfg.color}25` : 'none' }}>{items.length} found</span>
                                                 </div>
-                                                {items.length > 0 ? (
-                                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                                                        {items.map(item => (
-                                                            <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 4, background: `${cfg.color}08`, border: `1px solid ${cfg.color}22`, borderRadius: 3, padding: '3px 10px' }}>
-                                                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11.5, color: cfg.color, fontWeight: 600 }}>{item}</span>
-                                                                <CopyBtn text={item} />
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                ) : (
-                                                    <div style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic', fontFamily: 'var(--font-mono)' }}>{cfg.emptyMsg}</div>
-                                                )}
+                                                {items.length > 0
+                                                    ? <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>{items.map(item => <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 4, background: `${cfg.color}08`, border: `1px solid ${cfg.color}22`, borderRadius: 3, padding: '3px 10px' }}><span style={{ fontFamily: 'var(--font-mono)', fontSize: 11.5, color: cfg.color, fontWeight: 600 }}>{item}</span><CopyBtn text={item} /></div>)}</div>
+                                                    : <div style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic', fontFamily: 'var(--font-mono)' }}>{cfg.emptyMsg}</div>
+                                                }
                                             </div>
                                         );
                                     })}
                                 </div>
                             </div>
 
-                            {/* AI Analysis */}
+                            {/* AI Explanation */}
                             <div className="card explanation-block" style={{ padding: '20px' }}>
-                                <div className="explanation-badge">🤖 AI Fraud Analysis</div>
+                                <div className="explanation-badge">
+                                    {result.powered_by?.includes('DeepSeek') ? '🔒 Local AI (DeepSeek R1)' : '🔢 Rule Engine'}
+                                    <span style={{ marginLeft: 10, fontSize: 10, opacity: 0.5, fontStyle: 'normal', fontWeight: 'normal', textTransform: 'none' }}>Source: {result.powered_by}</span>
+                                </div>
                                 <div className="explanation-text">"{result.explanation}"</div>
                                 {result.matched_patterns?.length > 0 && (
                                     <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                                        {result.matched_patterns.map(p => (
-                                            <span key={p} className="pattern-chip" style={{ fontSize: 10 }}>⚠️ {p}</span>
-                                        ))}
+                                        {result.matched_patterns.map(p => <span key={p} className="pattern-chip" style={{ fontSize: 10 }}>⚠️ {p}</span>)}
                                     </div>
                                 )}
                             </div>
                         </div>
 
-                        {/* ===== RIGHT: Complaint Draft ===== */}
+                        {/* ── RIGHT: Portal Sections ── */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                            <div className="card" style={{ padding: '22px', flex: 1 }}>
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                                    <div className="section-title" style={{ marginBottom: 0 }}>🧾 Cybercrime Complaint Draft</div>
-                                    <div style={{ display: 'flex', gap: 8 }}>
-                                        <button
-                                            onClick={() => { navigator.clipboard.writeText(result.complaint_draft); setComplaintCopied(true); setTimeout(() => setComplaintCopied(false), 2000); }}
-                                            style={{ background: 'rgba(0,255,65,0.06)', border: '1px solid rgba(0,255,65,0.2)', color: complaintCopied ? '#00ff41' : 'var(--text-secondary)', padding: '5px 14px', borderRadius: 3, cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 1 }}>
-                                            {complaintCopied ? '✓ Copied!' : '⎘ Copy'}
-                                        </button>
-                                        <button
-                                            onClick={downloadComplaint}
-                                            style={{ background: 'rgba(0,255,255,0.06)', border: '1px solid rgba(0,255,255,0.2)', color: '#00ffff', padding: '5px 14px', borderRadius: 3, cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 1 }}>
-                                            ⬇ Download .txt
-                                        </button>
-                                        <button
-                                            onClick={generatePDF}
-                                            style={{ background: 'rgba(0,255,65,0.1)', border: '1px solid rgba(0,255,65,0.4)', color: '#00ff41', padding: '5px 16px', borderRadius: 3, cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 1, fontWeight: 700, boxShadow: '0 0 12px rgba(0,255,65,0.2)', textShadow: '0 0 8px rgba(0,255,65,0.5)' }}>
-                                            📄 Save as PDF
-                                        </button>
+
+                            {/* Legend */}
+                            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                                {[['rgba(0,255,65,0.5)', 'rgba(0,255,65,0.15)', '#00ff41', 'Auto pre-filled'], ['rgba(0,200,255,0.5)', 'rgba(0,200,255,0.12)', '#00cfff', 'You provided'], ['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.04)', 'var(--text-muted)', 'Fill on portal']].map(([bc, bg, tc, lab]) => (
+                                    <div key={lab} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                                        <div style={{ width: 10, height: 10, borderRadius: 2, border: `1px solid ${bc}`, background: bg }} />
+                                        <span style={{ color: tc }}>{lab}</span>
                                     </div>
-                                </div>
-
-                                <div style={{ fontSize: 9, color: 'var(--text-muted)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10, fontFamily: 'var(--font-mono)' }}>
-                                    Generated by: {result.complaint_by}
-                                </div>
-
-                                <pre style={{
-                                    fontFamily: 'var(--font-mono)',
-                                    fontSize: 11.5,
-                                    color: '#00cc33',
-                                    lineHeight: 1.85,
-                                    background: 'rgba(0,5,0,0.8)',
-                                    border: '1px solid rgba(0,255,65,0.1)',
-                                    borderRadius: 4,
-                                    padding: '18px',
-                                    whiteSpace: 'pre-wrap',
-                                    wordBreak: 'break-word',
-                                    maxHeight: 600,
-                                    overflowY: 'auto',
-                                }}>
-                                    {result.complaint_draft}
-                                </pre>
-
-                                <div style={{ marginTop: 14, padding: '12px 16px', background: 'rgba(255,59,92,0.04)', border: '1px solid rgba(255,59,92,0.15)', borderRadius: 4, fontSize: 11, color: '#ff8fa3', lineHeight: 1.7, fontFamily: 'var(--font-mono)' }}>
-                                    ⚠️ Fill in the [BRACKETED] placeholders before filing.<br />
-                                    📞 National Cyber Crime Helpline: <strong style={{ color: '#ff3b5c' }}>1930</strong> | <strong style={{ color: '#00ffff' }}>cybercrime.gov.in</strong>
-                                </div>
+                                ))}
                             </div>
+
+                            {/* Section 1 */}
+                            <div className="card" style={{ padding: '20px' }}>
+                                <SectionHeader number="1" title={mergedGuide.section1.title} prefilled={Object.values(mergedGuide.section1.fields).filter(f => f.status === 'prefilled' || f.status === 'user_provided').length} total={Object.keys(mergedGuide.section1.fields).length} />
+                                {Object.entries(mergedGuide.section1.fields).map(([k, f]) => <PortalField key={k} label={f.label} value={f.value} status={f.status} note={f.note} />)}
+                            </div>
+
+                            {/* Section 2 */}
+                            <div className="card" style={{ padding: '20px' }}>
+                                <SectionHeader number="2" title={mergedGuide.section2.title} prefilled={mergedGuide.summary.identifiers_found + (uf.consent ? 1 : 0) + (uf.suspectName ? 1 : 0)} total={mergedGuide.summary.identifiers_found + Object.keys(mergedGuide.section2.fields).length} />
+                                {mergedGuide.section2.identifiers.length > 0 && (
+                                    <div style={{ marginBottom: 14 }}>
+                                        <div style={{ fontSize: 10, color: '#00ff41', fontFamily: 'var(--font-mono)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>✓ Suspect Identifiers — Copy &amp; Add in Portal</div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                            {mergedGuide.section2.identifiers.map((id, i) => (
+                                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(0,255,65,0.04)', border: '1px solid rgba(0,255,65,0.15)', borderRadius: 5, padding: '7px 12px' }}>
+                                                    <span style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: '#00ffff', background: 'rgba(0,255,255,0.08)', border: '1px solid rgba(0,255,255,0.2)', borderRadius: 3, padding: '2px 7px', letterSpacing: 0.5, whiteSpace: 'nowrap' }}>{id.type}</span>
+                                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11.5, color: '#00ff41', fontWeight: 600, flex: 1, wordBreak: 'break-all' }}>{id.value}</span>
+                                                    <CopyBtn text={id.value} />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                                {Object.entries(mergedGuide.section2.fields).map(([k, f]) => <PortalField key={k} label={f.label} value={f.value} status={f.status} note={f.note} />)}
+                            </div>
+
+                            {/* Section 3 */}
+                            <div className="card" style={{ padding: '20px' }}>
+                                <SectionHeader number="3" title={mergedGuide.section3.title} prefilled={Object.values(mergedGuide.section3.fields).filter(f => f.status === 'user_provided').length} total={Object.keys(mergedGuide.section3.fields).length} />
+                                {Object.entries(mergedGuide.section3.fields).map(([k, f]) => <PortalField key={k} label={f.label} value={f.value} status={f.status} note={f.note} />)}
+                            </div>
+
+                            {/* File CTA */}
+                            <a href="https://cybercrime.gov.in" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '14px 20px', background: 'linear-gradient(135deg,rgba(0,255,65,0.12),rgba(0,255,255,0.06))', border: '1px solid rgba(0,255,65,0.3)', borderRadius: 8, textDecoration: 'none', color: '#00ff41', fontWeight: 700, fontSize: 13, fontFamily: 'var(--font-mono)', letterSpacing: 1, boxShadow: '0 0 20px rgba(0,255,65,0.1)' }}>
+                                🏛️ Open cybercrime.gov.in &amp; Start Filing
+                                <span style={{ fontSize: 11, color: 'rgba(0,255,65,0.5)', fontWeight: 'normal' }}>— use this guide while filling</span>
+                            </a>
                         </div>
                     </div>
                 </>
