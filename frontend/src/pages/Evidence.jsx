@@ -19,9 +19,9 @@ const ENTITY_CONFIG = [
 ];
 
 const SAMPLES = [
-    { label: 'UPI Fraud SMS', text: 'Congratulations! Your UPI cashback of Rs 5000 is ready. Pay Rs 1 to receive it. UPI: scammer@okaxis | Contact: 9876543210 | Link: bit.ly/getmoney | Expires 03/03/2026 at 11:59 PM!' },
-    { label: 'KYC Phishing', text: 'Dear SBI customer, your KYC has expired. Click http://sbi-kyc-update.com/verify to update immediately. Your account will be blocked by 25/02/2026. Call 8800112233 for help.' },
-    { label: 'Investment Scam', text: 'Join WhatsApp investment group! Guaranteed 5% daily returns. Contact invest.guru@paytm. Pay Rs 5000 to receive Rs 50000 in 30 days! Call 9000011111. Telegram: t.me/earnfast' },
+    { label: 'UPI Fraud SMS', text: 'URGNT: sir ur HDFC bank acount will block today!!! clam ur UPI cashback Rs 5000 fast. pay Rs 1 only to receive. scan QR code or click link bit.ly/getmoney . customer care number 9876543210' },
+    { label: 'KYC Phishing', text: 'sbi customer ur KYC is expire n acount suspended. click fast http://sbi-kyc-update.com/verify to update PAN and aadhaar card dtls. forward OTP to 8800112233 for verification.' },
+    { label: 'Investment Scam', text: 'vip telegram group join fast!! 10% daily return gurantee. members earning big profit every day. u pay Rs 5000 and get Rs 50000. msg admin invest.guru@paytm' },
 ];
 
 const PLATFORMS = ['Email', 'Facebook', 'Instagram', 'Snapchat', 'Twitter', 'WhatsApp', 'Website URL', 'YouTube', 'LinkedIn', 'Telegram', 'Mobile App', 'SMS', 'Other'];
@@ -194,6 +194,32 @@ export default function Evidence() {
         return () => clearTimeout(saveTimerRef.current);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, PROFILE_FIELDS.map(k => uf[k]));
+
+    const handleDownloadPdf = async () => {
+        try {
+            setLoading(true);
+            const r = await fetch('http://localhost:8000/api/generate-pdf', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ guide: mergedGuide }),
+            });
+            if (!r.ok) throw new Error(`Server error ${r.status}`);
+            const blob = await r.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'cybercrime_complaint_guide.pdf';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (e) {
+            console.error(e);
+            alert('Failed to generate PDF: ' + e.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleClearProfile = () => {
         clearProfile();
@@ -561,6 +587,10 @@ export default function Evidence() {
                         </div>
                         <div style={{ display: 'flex', gap: 8 }}>
                             <button onClick={() => setStep('user_form')} className="btn-ghost">← Edit Details</button>
+                            <button onClick={handleDownloadPdf} className="btn-ghost" style={{ background: 'rgba(59, 130, 246, 0.1)', color: 'var(--accent-light)' }}>
+                                <FileText size={11} style={{ display: 'inline', marginRight: 4 }} />
+                                Save as PDF
+                            </button>
                             <a href="https://cybercrime.gov.in" target="_blank" rel="noopener noreferrer" className="btn-secondary-link">
                                 Open Portal <ExternalLink size={11} style={{ display: 'inline', marginLeft: 4 }} />
                             </a>

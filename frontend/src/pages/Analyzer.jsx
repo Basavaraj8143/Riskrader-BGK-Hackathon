@@ -178,7 +178,7 @@ export default function Analyzer() {
                                         result.powered_by?.includes('DeepSeek') || result.powered_by?.includes('Ollama') ? 'Local AI (DeepSeek)' :
                                             'Rule Engine Fallback'}
                                     <span style={{ marginLeft: '12px', fontSize: 10, opacity: 0.6, fontStyle: 'normal', fontWeight: 'normal', textTransform: 'none' }}>
-                                        Source: {result.powered_by}
+                                        Source: {result.powered_by} {result.powered_by?.includes('DeepSeek') || result.powered_by?.includes('Gemini') ? '(0)' : '(1)'}
                                     </span>
                                 </div>
                                 <div className="explanation-text">"{result.explanation}"</div>
@@ -205,6 +205,6 @@ export default function Analyzer() {
                     )}
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
