@@ -2,8 +2,12 @@ import { useState, useEffect } from 'react';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell
 } from 'recharts';
+import {
+    AlertTriangle, AlertCircle, CheckCircle,
+    TrendingUp, Newspaper, Radio, ExternalLink
+} from 'lucide-react';
 
-const COLORS = ['#ff3b5c', '#fbbf24', '#a855f7', '#6c63ff', '#10d9a0', '#f472b6'];
+const COLORS = ['#ef4444', '#f59e0b', '#a855f7', '#6c63ff', '#10b981', '#f472b6'];
 
 const FALLBACK_HEADLINES = [
     { title: 'UPI fraud cases surge 40% in Q1 2025 — NPCI issues advisory', source: 'Economic Times', category: 'UPI Fraud', publishedAt: '2025-01-15' },
@@ -29,11 +33,11 @@ const FALLBACK_TRENDS = [
 const GlowTooltip = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;
     return (
-        <div style={{ background: 'rgba(10,14,28,0.97)', border: '1px solid rgba(108,99,255,0.25)', borderRadius: 10, padding: '10px 16px' }}>
-            <p style={{ color: '#8892aa', fontSize: 11, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '1px' }}>{label}</p>
+        <div style={{ background: 'rgba(10,14,28,0.97)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 8, padding: '10px 16px' }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: 11, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '1px' }}>{label}</p>
             {payload.map(p => (
                 <p key={p.name} style={{ color: p.fill, fontSize: 14, fontWeight: 700 }}>
-                    {p.value} <span style={{ color: '#8892aa', fontSize: 11, fontWeight: 400 }}>articles</span>
+                    {p.value} <span style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 400 }}>articles</span>
                 </p>
             ))}
         </div>
@@ -58,16 +62,19 @@ export default function Trends() {
     const trendData = (data?.trend_data || FALLBACK_TRENDS).map((d, i) => ({ ...d, color: COLORS[i % COLORS.length] }));
     const headlines = data?.headlines || FALLBACK_HEADLINES;
 
+    const AlertIcon = alertLevel === 'HIGH' ? AlertTriangle : alertLevel === 'LOW' ? CheckCircle : AlertCircle;
     const alertInfo = {
-        HIGH: { icon: '🚨', title: `Fraud Alert Level: HIGH`, sub: 'Significantly elevated scam activity detected — exercise extreme caution', cls: 'alert-high', color: 'var(--danger)' },
-        MEDIUM: { icon: '⚠️', title: `Alert Level: MODERATE`, sub: 'Above-average fraud activity detected — stay vigilant with financial transactions', cls: 'alert-medium', color: 'var(--warning)' },
-        LOW: { icon: '✅', title: `Alert Level: LOW`, sub: 'Normal fraud activity levels — basic precautions recommended', cls: 'alert-low', color: 'var(--safe)' },
+        HIGH: { title: 'Fraud Alert Level: HIGH', sub: 'Significantly elevated scam activity detected — exercise extreme caution', cls: 'alert-high', color: 'var(--danger)' },
+        MEDIUM: { title: 'Alert Level: Moderate', sub: 'Above-average fraud activity detected — stay vigilant with financial transactions', cls: 'alert-medium', color: 'var(--warning)' },
+        LOW: { title: 'Alert Level: Low', sub: 'Normal fraud activity levels — basic precautions recommended', cls: 'alert-low', color: 'var(--safe)' },
     }[alertLevel] || {};
 
     return (
         <div>
             <div className="page-header">
-                <div className="page-label">📰 Live Intelligence Feed</div>
+                <div className="page-label">
+                    <Radio size={11} /> Live Intelligence Feed
+                </div>
                 <h1 className="page-title">
                     Fraud Trend <span className="highlight">Intelligence</span>
                 </h1>
@@ -79,7 +86,9 @@ export default function Trends() {
             {/* Alert Banner */}
             {!loading && (
                 <div className={`alert-banner ${alertInfo.cls}`}>
-                    <div className="alert-icon">{alertInfo.icon}</div>
+                    <div className="alert-icon">
+                        <AlertIcon size={24} color={alertInfo.color} />
+                    </div>
                     <div className="alert-content">
                         <div className="alert-title" style={{ color: alertInfo.color }}>{alertInfo.title}</div>
                         <div className="alert-sub">{alertInfo.sub}</div>
@@ -93,7 +102,9 @@ export default function Trends() {
 
             {/* Top Callout */}
             <div className="card callout-card mb-20">
-                <div className="callout-emoji">🔥</div>
+                <div className="callout-emoji">
+                    <TrendingUp size={36} color="var(--danger-light)" />
+                </div>
                 <div>
                     <div className="callout-title">{topCat}</div>
                     <div className="callout-desc">
@@ -103,7 +114,7 @@ export default function Trends() {
                 </div>
                 <div className="callout-actions">
                     <a href="https://cybercrime.gov.in" target="_blank" rel="noreferrer" className="btn-danger">
-                        Report Now →
+                        Report Now <ExternalLink size={11} style={{ display: 'inline', marginLeft: 4 }} />
                     </a>
                     <span style={{ fontSize: 11, color: 'var(--text-muted)', textAlign: 'center' }}>cybercrime.gov.in</span>
                 </div>
@@ -112,24 +123,18 @@ export default function Trends() {
             <div className="trends-grid">
                 {/* Bar Chart */}
                 <div className="card chart-card">
-                    <div className="section-title">📊 Articles by Fraud Category</div>
+                    <div className="section-title">
+                        <BarChart size={13} /> Articles by Fraud Category
+                    </div>
                     <ResponsiveContainer width="100%" height={280}>
                         <BarChart data={trendData} barCategoryGap="30%" margin={{ top: 4, right: 4, bottom: 20, left: -10 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-                            <XAxis
-                                dataKey="category"
-                                stroke="transparent"
-                                tick={{ fill: '#3d4a60', fontSize: 10 }}
-                                angle={-35}
-                                textAnchor="end"
-                                interval={0}
-                                height={60}
-                            />
-                            <YAxis stroke="transparent" tick={{ fill: '#3d4a60', fontSize: 11 }} />
-                            <Tooltip content={<GlowTooltip />} cursor={{ fill: 'rgba(108,99,255,0.05)' }} />
+                            <XAxis dataKey="category" stroke="transparent" tick={{ fill: '#475569', fontSize: 10 }} angle={-35} textAnchor="end" interval={0} height={60} />
+                            <YAxis stroke="transparent" tick={{ fill: '#475569', fontSize: 11 }} />
+                            <Tooltip content={<GlowTooltip />} cursor={{ fill: 'rgba(59,130,246,0.05)' }} />
                             <Bar dataKey="count" radius={[6, 6, 0, 0]}>
                                 {trendData.map((e, i) => (
-                                    <Cell key={i} fill={e.color} style={{ filter: `drop-shadow(0 0 8px ${e.color}60)` }} />
+                                    <Cell key={i} fill={e.color} />
                                 ))}
                             </Bar>
                         </BarChart>
@@ -138,7 +143,9 @@ export default function Trends() {
 
                 {/* Headlines */}
                 <div className="card chart-card">
-                    <div className="section-title">📰 Recent Fraud Reports</div>
+                    <div className="section-title">
+                        <Newspaper size={13} /> Recent Fraud Reports
+                    </div>
                     <div>
                         {headlines.slice(0, 6).map((h, i) => (
                             <div key={i} className="headline-item">
@@ -156,10 +163,10 @@ export default function Trends() {
                 </div>
             </div>
 
-            <div className="card" style={{ padding: '16px 22px' }}>
+            <div className="card" style={{ padding: '14px 20px' }}>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span>📡</span>
-                    Data powered by <strong style={{ color: 'var(--accent-light)' }}>NewsAPI</strong> — updated every request. Curated Indian fraud news keywords: UPI scam, phishing, loan app fraud, cyber crime.
+                    <Radio size={12} style={{ flexShrink: 0 }} />
+                    Data powered by <strong style={{ color: 'var(--accent-light)', marginLeft: 3, marginRight: 3 }}>NewsAPI</strong> — updated every request. Curated Indian fraud news keywords: UPI scam, phishing, loan app fraud, cyber crime.
                 </div>
             </div>
         </div>

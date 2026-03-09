@@ -1,5 +1,9 @@
 import { BrowserRouter, Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import {
+  LayoutDashboard, ScanLine, FlaskConical, BookOpen, Info,
+  ShieldAlert, Clock
+} from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import Analyzer from './pages/Analyzer';
 import Evidence from './pages/Evidence';
@@ -7,11 +11,11 @@ import Encyclopedia from './pages/Encyclopedia';
 import About from './pages/About';
 
 const NAV_ITEMS = [
-  { path: '/', icon: '▦', label: 'Dashboard', emoji: '📊' },
-  { path: '/analyzer', icon: '⬡', label: 'Analyzer', emoji: '🔍' },
-  { path: '/evidence', icon: '🧾', label: 'Evidence Lab', emoji: '🧾' },
-  { path: '/encyclopedia', icon: '≡', label: 'Research Lab', emoji: '📚' },
-  { path: '/about', icon: '◎', label: 'About', emoji: 'ℹ️' },
+  { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
+  { path: '/analyzer', icon: ScanLine, label: 'Analyzer' },
+  { path: '/evidence', icon: FlaskConical, label: 'Evidence Lab' },
+  { path: '/encyclopedia', icon: BookOpen, label: 'Research Lab' },
+  { path: '/about', icon: Info, label: 'About' },
 ];
 
 const PAGE_META = {
@@ -46,7 +50,8 @@ function Topbar() {
           LIVE
         </div>
         <div className="topbar-chip">
-          🇮🇳 {time.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} IST
+          <Clock size={11} style={{ opacity: 0.6 }} />
+          {time.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} IST
         </div>
       </div>
     </div>
@@ -59,8 +64,9 @@ function Sidebar() {
       <div className="sidebar-brand">
         <div className="brand-logo">
           <div className="brand-icon-wrap">
-            <div className="brand-icon">🛡️</div>
-            <div className="brand-icon-ring" />
+            <div className="brand-icon">
+              <ShieldAlert size={18} color="var(--accent-light)" />
+            </div>
           </div>
           <div className="brand-text">
             <div className="brand-name">FinGuard AI</div>
@@ -69,21 +75,24 @@ function Sidebar() {
         </div>
       </div>
 
-      <div className="sidebar-divider" />
-
       <div className="sidebar-nav">
         <div className="nav-section-label">Navigation</div>
-        {NAV_ITEMS.map(item => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            end={item.path === '/'}
-            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-          >
-            <span className="nav-icon">{item.emoji}</span>
-            {item.label}
-          </NavLink>
-        ))}
+        {NAV_ITEMS.map(item => {
+          const Icon = item.icon;
+          return (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              end={item.path === '/'}
+              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+            >
+              <span className="nav-icon">
+                <Icon size={15} />
+              </span>
+              {item.label}
+            </NavLink>
+          );
+        })}
       </div>
 
       <div className="sidebar-footer">
