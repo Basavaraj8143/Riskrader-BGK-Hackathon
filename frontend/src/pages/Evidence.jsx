@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import {
     Wallet, Phone, Link, DollarSign, CalendarDays, Building2, Mail,
     Copy, Check, FileText, ClipboardList, BookMarked,
@@ -28,6 +28,34 @@ const PLATFORMS = ['Email', 'Facebook', 'Instagram', 'Snapchat', 'Twitter', 'Wha
 const TITLES = ['Mr', 'Mrs', 'Dr', 'Shri', 'Smt', 'Prof', 'Miss'];
 const GENDERS = ['Male', 'Female', 'Other'];
 const RELATIONS = ['Father', 'Mother', 'Spouse'];
+
+// ── Profile persistence (localStorage) ───────────────────────────
+const PROFILE_KEY = 'finguard_complainant_profile';
+// Fields that belong to the user's personal profile (saved across sessions)
+// Incident-specific fields (incidentDate, platform, delay, suspectName, consent)
+// are intentionally NOT part of the profile.
+const PROFILE_FIELDS = [
+    'title', 'fullName', 'mobile', 'gender', 'dob',
+    'familyRelation', 'familyName', 'email',
+    'houseNo', 'street', 'colony', 'city', 'state', 'pincode', 'policeStation',
+];
+
+function loadProfile() {
+    try {
+        const raw = localStorage.getItem(PROFILE_KEY);
+        return raw ? JSON.parse(raw) : {};
+    } catch { return {}; }
+}
+
+function saveProfile(uf) {
+    const profileData = {};
+    PROFILE_FIELDS.forEach(k => { profileData[k] = uf[k]; });
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(profileData));
+}
+
+function clearProfile() {
+    localStorage.removeItem(PROFILE_KEY);
+}
 
 // ── Tiny helpers ──────────────────────────────────────────────────
 function CopyBtn({ text }) {
@@ -121,15 +149,60 @@ export default function Evidence() {
     const [error, setError] = useState(null);
     const fileRef = useRef(null);
 
-    const [uf, setUf] = useState({
-        incidentDate: '', platform: '', delay: '',
-        suspectName: '', consent: false,
-        title: '', fullName: '', mobile: '', gender: '', dob: '',
-        familyRelation: '', familyName: '',
-        email: '', houseNo: '', street: '', colony: '', city: '',
-        state: '', pincode: '', policeStation: '',
+    // Initialise with saved profile from localStorage
+    const [uf, setUf] = useState(() => {
+        const saved = loadProfile();
+        return {
+            // Incident-specific (always fresh per session)
+            incidentDate: '', platform: '', delay: '',
+            suspectName: '', consent: false,
+            // Complainant profile — loaded from localStorage if available, else use hardcoded defaults
+            title: saved.title !== undefined ? saved.title : 'Mr',
+            fullName: saved.fullName !== undefined ? saved.fullName : 'Basavaraj Ningasani',
+            mobile: saved.mobile !== undefined ? saved.mobile : '7019910124',
+            gender: saved.gender !== undefined ? saved.gender : 'Male',
+            dob: saved.dob !== undefined ? saved.dob : '2004-10-20',
+            familyRelation: saved.familyRelation !== undefined ? saved.familyRelation : 'Father',
+            familyName: saved.familyName !== undefined ? saved.familyName : 'Mhantesh Ningasani',
+            email: saved.email !== undefined ? saved.email : 'basavarajningasani123@gmail.com',
+            houseNo: saved.houseNo !== undefined ? saved.houseNo : '12B',
+            street: saved.street !== undefined ? saved.street : 'Navanagara cross',
+            colony: saved.colony !== undefined ? saved.colony : 'Navanagar',
+            city: saved.city !== undefined ? saved.city : 'BAGALKOT',
+            state: saved.state !== undefined ? saved.state : 'Karnataka',
+            pincode: saved.pincode !== undefined ? saved.pincode : '587301',
+            policeStation: saved.policeStation !== undefined ? saved.policeStation : 'Navanagara Police Station',
+        };
     });
+
+    const [profileSaved, setProfileSaved] = useState(false);
+    const saveTimerRef = useRef(null);
+
     const up = (key, val) => setUf(p => ({ ...p, [key]: val }));
+
+    // Auto-save profile fields whenever any profile field changes
+    useEffect(() => {
+        // Only auto-save if at least one profile field has a non-empty value
+        const hasAnyValue = PROFILE_FIELDS.some(k => uf[k]);
+        if (!hasAnyValue) return;
+        clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = setTimeout(() => {
+            saveProfile(uf);
+            setProfileSaved(true);
+            setTimeout(() => setProfileSaved(false), 2200);
+        }, 800); // debounce 800 ms
+        return () => clearTimeout(saveTimerRef.current);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, PROFILE_FIELDS.map(k => uf[k]));
+
+    const handleClearProfile = () => {
+        clearProfile();
+        setUf(p => {
+            const reset = { ...p };
+            PROFILE_FIELDS.forEach(k => { reset[k] = ''; });
+            return reset;
+        });
+    };
 
     const handleImageDrop = (e) => {
         e.preventDefault();
@@ -152,17 +225,19 @@ export default function Evidence() {
             if (data.error) throw new Error(data.error);
             setResult(data);
             const pg = data.portal_guide;
+            const sn = pg?.section2?.fields?.suspect_name?.value;
             setUf(p => ({
                 ...p,
                 incidentDate: pg?.section1?.fields?.incident_date?.value || '',
                 platform: pg?.section1?.fields?.platform?.value || '',
+                suspectName: sn && sn !== 'Unknown' ? sn : '',
             }));
             setStep('user_form');
         } catch (e) { setError(e.message); }
         finally { setLoading(false); }
     };
 
-    const lvlColor = { HIGH: 'var(--danger-light)', MEDIUM: 'var(--warning-light)', LOW: 'var(--safe-light)' };
+
     const pg = result?.portal_guide;
 
     const mergedGuide = pg ? {
@@ -346,7 +421,6 @@ export default function Evidence() {
                     {/* Summary bar */}
                     <div style={{ display: 'flex', gap: 10, marginBottom: 18, flexWrap: 'wrap', alignItems: 'center' }}>
                         {[
-                            { label: 'Risk Score', val: `${result.score}/100`, color: lvlColor[result.level] },
                             { label: 'Category', val: result.category, color: 'var(--accent-light)' },
                             { label: 'Entities', val: `${result.entity_count} found`, color: 'var(--safe-light)' },
                             { label: 'AI', val: result.powered_by?.includes('DeepSeek') ? 'DeepSeek (Local)' : 'Gemini', color: 'var(--text-secondary)' },
@@ -407,9 +481,21 @@ export default function Evidence() {
                             <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
                                 <User size={12} /> Section 3 — Your Details (Complainant)
                             </div>
-                            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14, lineHeight: 1.5 }}>
-                                Fill what you can — more you provide, the more complete your portal guide will be.
-                                <span style={{ color: 'var(--safe-light)', marginLeft: 4 }}>All optional for the guide.</span>
+                            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
+                                <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                                    Fill what you can — more you provide, the more complete your portal guide will be.
+                                    <span style={{ color: 'var(--safe-light)', marginLeft: 4 }}>All optional for the guide.</span>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+                                    <span style={{ fontSize: 10, color: profileSaved ? 'var(--safe-light)' : 'transparent', transition: 'color 0.3s', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                        <Check size={10} /> Profile auto-saved
+                                    </span>
+                                    {PROFILE_FIELDS.some(k => uf[k]) && (
+                                        <button onClick={handleClearProfile} className="btn-ghost" style={{ padding: '4px 8px', fontSize: 10, height: 'auto', background: 'rgba(239,68,68,0.05)', color: 'var(--danger-light)' }}>
+                                            Clear Profile
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                                 <div style={{ display: 'grid', gridTemplateColumns: '110px 1fr', gap: 10 }}>
@@ -484,15 +570,11 @@ export default function Evidence() {
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.05fr', gap: 18 }}>
                         {/* LEFT: Entities + AI */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                            {/* Risk card */}
+                            {/* Analysis Summary */}
                             <div className="card" style={{ padding: '18px 20px', display: 'flex', alignItems: 'center', gap: 18 }}>
                                 <div>
-                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 46, fontWeight: 700, color: lvlColor[result.level], lineHeight: 1 }}>{result.score}</div>
-                                    <div style={{ fontSize: 9.5, color: 'var(--text-muted)', letterSpacing: 1, textTransform: 'uppercase', marginTop: 4 }}>Risk Score</div>
-                                </div>
-                                <div>
-                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 700, color: lvlColor[result.level], letterSpacing: 1, textTransform: 'uppercase' }}>{result.level} RISK</div>
-                                    <span style={{ background: 'var(--accent-dim)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 20, padding: '3px 10px', fontSize: 11, color: 'var(--accent-light)', fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase', marginTop: 8, display: 'inline-block' }}>{result.category}</span>
+                                    <div style={{ fontSize: 9.5, color: 'var(--text-muted)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 6 }}>Identified Category</div>
+                                    <span style={{ background: 'var(--accent-dim)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 20, padding: '4px 12px', fontSize: 11.5, color: 'var(--accent-light)', fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase', display: 'inline-block' }}>{result.category}</span>
                                 </div>
                                 <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
                                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: 26, fontWeight: 700, color: 'var(--text-primary)' }}>{result.entity_count}</div>
