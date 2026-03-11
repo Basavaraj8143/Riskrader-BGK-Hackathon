@@ -1,67 +1,121 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
     TrendingUp, AlertTriangle, ShieldCheck, Newspaper,
-    BarChart2, PieChart as PieIcon, Radio
+    BarChart2, Radio, ExternalLink, AlertCircle, CheckCircle
 } from 'lucide-react';
 import {
-    LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
-    XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+    ResponsiveContainer, Cell
 } from 'recharts';
 
-const TREND_DATA = [
-    { day: 'Mon', cases: 12, safe: 45 },
-    { day: 'Tue', cases: 18, safe: 51 },
-    { day: 'Wed', cases: 9, safe: 38 },
-    { day: 'Thu', cases: 27, safe: 62 },
-    { day: 'Fri', cases: 21, safe: 55 },
-    { day: 'Sat', cases: 34, safe: 70 },
-    { day: 'Sun', cases: 29, safe: 66 },
-];
+const COLORS = ['#ef4444', '#f59e0b', '#a855f7', '#6c63ff', '#10b981', '#f472b6', '#60a5fa'];
 
-const PIE_DATA = [
-    { name: 'UPI Fraud', value: 34, color: '#ef4444' },
-    { name: 'Phishing', value: 22, color: '#f59e0b' },
-    { name: 'Loan App', value: 15, color: '#a855f7' },
-    { name: 'Investment', value: 18, color: '#6c63ff' },
-    { name: 'Job Scam', value: 7, color: '#10b981' },
-    { name: 'Other', value: 4, color: '#3d4a60' },
-];
+// ── Count-up hook ─────────────────────────────────────────────────
+function useCountUp(target, duration = 1200) {
+    const [value, setValue] = useState(0);
+    useEffect(() => {
+        if (!target) return;
+        const numeric = parseInt(String(target).replace(/,/g, ''), 10);
+        if (isNaN(numeric)) { setValue(target); return; }
+        const steps = 40;
+        const interval = duration / steps;
+        let step = 0;
+        const timer = setInterval(() => {
+            step++;
+            setValue(Math.round((numeric * step) / steps));
+            if (step >= steps) clearInterval(timer);
+        }, interval);
+        return () => clearInterval(timer);
+    }, [target, duration]);
+    return typeof value === 'number' ? value.toLocaleString('en-IN') : value;
+}
 
-const STATS = [
-    { Icon: TrendingUp, value: '1,247', label: 'Messages Analyzed', trend: '+12%', trendType: 'danger', iconBg: 'rgba(108,99,255,0.12)', valueColor: 'var(--text-primary)', iconColor: '#818cf8' },
-    { Icon: AlertTriangle, value: '38', label: 'High Risk Detected', trend: '+5 today', trendType: 'danger', iconBg: 'rgba(239,68,68,0.12)', valueColor: 'var(--danger)', iconColor: '#ef4444' },
-    { Icon: ShieldCheck, value: '22', label: 'Frauds Prevented', trend: 'Today', trendType: 'safe', iconBg: 'rgba(16,185,129,0.12)', valueColor: 'var(--safe)', iconColor: '#10b981' },
-    { Icon: Newspaper, value: '156', label: 'Articles Tracked', trend: 'This week', trendType: 'neutral', iconBg: 'rgba(251,191,36,0.12)', valueColor: 'var(--text-primary)', iconColor: '#fbbf24' },
-];
+// ── Stat Card ─────────────────────────────────────────────────────
+function StatCard({ Icon, rawValue, label, trend, trendType, iconBg, valueColor, iconColor }) {
+    const animated = useCountUp(rawValue);
+    return (
+        <div className="card stat-card">
+            <div className="stat-card-top">
+                <div className="stat-icon-box" style={{ background: iconBg }}>
+                    <Icon size={16} color={iconColor} />
+                </div>
+                <div className={`stat-trend-chip trend-${trendType}`}>{trend}</div>
+            </div>
+            <div className="stat-value" style={{ color: valueColor }}>{animated}</div>
+            <div className="stat-label">{label}</div>
+        </div>
+    );
+}
 
-const TICKER_ITEMS = [
-    'ALERT: UPI QR code scam targeting college students in Pune — 40 victims reported',
-    'RBI WARNING: Fake TRAI disconnect calls surge 40% this week across metro cities',
-    'BREAKING: KYC phishing SMS campaign using SBI branding — Do not click any links',
-    'ADVISORY: Fake WhatsApp investment groups promise 5% daily returns — Ponzi scheme',
-    'ALERT: Loan app blackmail cases up 25% in Maharashtra — Report to 1930 immediately',
-];
-
+// ── Custom tooltip ────────────────────────────────────────────────
 const GlowTooltip = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;
     return (
-        <div style={{ background: 'rgba(10,14,28,0.97)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 8, padding: '10px 16px', boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
-            <p style={{ color: 'var(--text-muted)', fontSize: 11, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>{label}</p>
+        <div style={{ background: 'rgba(10,14,28,0.97)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 8, padding: '10px 16px' }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: 11, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '1px' }}>{label}</p>
             {payload.map(p => (
-                <p key={p.name} style={{ color: p.color, fontSize: 13, fontWeight: 600, marginBottom: 2 }}>
-                    {p.name}: <span style={{ color: 'var(--text-primary)' }}>{p.value}</span>
+                <p key={p.name} style={{ color: p.fill, fontSize: 14, fontWeight: 700 }}>
+                    {p.value} <span style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 400 }}>articles</span>
                 </p>
             ))}
         </div>
     );
 };
 
+// ─────────────────────────────────────────────────────────────────
 export default function Dashboard() {
+    const [trends, setTrends] = useState(null);
+    const [stats, setStats] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [tickerIdx, setTickerIdx] = useState(0);
+    const [tickerAnim, setTickerAnim] = useState(true);
+
     useEffect(() => {
-        const t = setInterval(() => setTickerIdx(i => (i + 1) % TICKER_ITEMS.length), 6000);
-        return () => clearInterval(t);
+        Promise.all([
+            fetch('http://localhost:8000/api/trends').then(r => r.json()).catch(() => null),
+            fetch('http://localhost:8000/api/stats').then(r => r.json()).catch(() => null),
+        ]).then(([t, s]) => {
+            setTrends(t);
+            setStats(s);
+            setLoading(false);
+        });
     }, []);
+
+    // Ticker — animate between real headlines
+    const headlines = trends?.headlines || [];
+    useEffect(() => {
+        if (!headlines.length) return;
+        const t = setInterval(() => {
+            setTickerAnim(false);
+            setTimeout(() => {
+                setTickerIdx(i => (i + 1) % headlines.length);
+                setTickerAnim(true);
+            }, 300);
+        }, 6000);
+        return () => clearInterval(t);
+    }, [headlines.length]);
+
+    // Derive data
+    const alertLevel = trends?.alert_level || 'MEDIUM';
+    const topCat = trends?.top_category || '—';
+    const catCounts = trends?.category_counts || {};
+    const chartData = Object.entries(catCounts)
+        .map(([cat, count], i) => ({ category: cat, count, color: COLORS[i % COLORS.length] }))
+        .sort((a, b) => b.count - a.count);
+
+    const alertInfo = {
+        HIGH:   { title: 'Fraud Alert: HIGH',   sub: 'Elevated scam activity — exercise extreme caution', Icon: AlertTriangle, color: 'var(--danger)',  cls: 'alert-high' },
+        MEDIUM: { title: 'Alert Level: Moderate', sub: 'Above-average fraud activity — stay vigilant',      Icon: AlertCircle,   color: 'var(--warning)', cls: 'alert-medium' },
+        LOW:    { title: 'Alert Level: Low',      sub: 'Normal activity — basic precautions recommended',   Icon: CheckCircle,   color: 'var(--safe)',    cls: 'alert-low' },
+    }[alertLevel] || {};
+    const AlertIcon = alertInfo.Icon || AlertCircle;
+
+    const STAT_CARDS = [
+        { Icon: TrendingUp,  rawValue: stats?.total_analyzed,        label: 'Messages Analyzed',  trend: 'All time',     trendType: 'neutral', iconBg: 'rgba(108,99,255,0.12)', valueColor: 'var(--text-primary)', iconColor: '#818cf8' },
+        { Icon: AlertTriangle, rawValue: stats?.high_risk_today,     label: 'High Risk Detected', trend: 'Today',        trendType: 'danger',  iconBg: 'rgba(239,68,68,0.12)',  valueColor: 'var(--danger)',       iconColor: '#ef4444' },
+        { Icon: ShieldCheck, rawValue: stats?.fraud_prevented_today, label: 'Frauds Prevented',   trend: 'Today',        trendType: 'safe',    iconBg: 'rgba(16,185,129,0.12)', valueColor: 'var(--safe)',         iconColor: '#10b981' },
+        { Icon: Newspaper,   rawValue: trends?.total_articles,       label: 'Articles Tracked',   trend: 'Last 7 days',  trendType: 'neutral', iconBg: 'rgba(251,191,36,0.12)', valueColor: 'var(--text-primary)', iconColor: '#fbbf24' },
+    ];
 
     return (
         <div>
@@ -73,75 +127,96 @@ export default function Dashboard() {
                     India's Digital Fraud <span className="highlight">Command Center</span>
                 </h1>
                 <p className="page-subtitle">
-                    Monitor, detect, and prevent financial fraud in real-time across India's digital payment ecosystem.
+                    Live fraud intelligence powered by NewsAPI — tracking India's digital scam landscape in real time.
                 </p>
             </div>
 
-            {/* Stat Cards */}
+
+
+            {/* ── Stat Cards ── */}
             <div className="stat-grid">
-                {STATS.map(s => {
-                    const Icon = s.Icon;
-                    return (
-                        <div key={s.label} className="card stat-card">
-                            <div className="stat-card-top">
-                                <div className="stat-icon-box" style={{ background: s.iconBg }}>
-                                    <Icon size={16} color={s.iconColor} />
-                                </div>
-                                <div className={`stat-trend-chip trend-${s.trendType}`}>{s.trend}</div>
-                            </div>
-                            <div className="stat-value" style={{ color: s.valueColor }}>{s.value}</div>
-                            <div className="stat-label">{s.label}</div>
-                        </div>
-                    );
-                })}
+                {STAT_CARDS.map(s => <StatCard key={s.label} {...s} />)}
             </div>
 
-            {/* Charts */}
+            {/* ── Charts + Headlines ── */}
             <div className="chart-grid">
+                {/* Real category bar chart from NewsAPI */}
                 <div className="card chart-card">
                     <div className="section-title">
-                        <BarChart2 size={13} /> 7-Day Fraud Activity
+                        <BarChart2 size={13} /> Scam Reports by Category
+                        <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--text-muted)', fontWeight: 400 }}>
+                            India · NCRB 2024 data
+                        </span>
                     </div>
-                    <ResponsiveContainer width="100%" height={220}>
-                        <LineChart data={TREND_DATA} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                            <XAxis dataKey="day" stroke="transparent" tick={{ fill: '#475569', fontSize: 11 }} />
-                            <YAxis stroke="transparent" tick={{ fill: '#475569', fontSize: 11 }} />
-                            <Tooltip content={<GlowTooltip />} />
-                            <Legend wrapperStyle={{ fontSize: 12, color: '#64748b', paddingTop: 12 }} />
-                            <Line type="monotone" dataKey="cases" name="Fraud Cases" stroke="#ef4444" strokeWidth={2.5} dot={{ fill: '#ef4444', r: 4, strokeWidth: 0 }} />
-                            <Line type="monotone" dataKey="safe" name="Messages Scanned" stroke="#3b82f6" strokeWidth={2} strokeDasharray="5 5" dot={false} />
-                        </LineChart>
-                    </ResponsiveContainer>
+                    {loading ? (
+                        <div style={{ height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: 12 }}>
+                            Fetching live data...
+                        </div>
+                    ) : (
+                        <ResponsiveContainer width="100%" height={240}>
+                            <BarChart data={chartData} layout="vertical" barCategoryGap="25%" margin={{ top: 4, right: 20, bottom: 4, left: 10 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={false} />
+                                <XAxis type="number" stroke="transparent" tick={{ fill: '#475569', fontSize: 10 }} />
+                                <YAxis type="category" dataKey="category" stroke="transparent" tick={{ fill: '#94a3b8', fontSize: 10 }} width={110} />
+                                <Tooltip content={<GlowTooltip />} cursor={{ fill: 'rgba(59,130,246,0.05)' }} />
+                                <Bar dataKey="count" radius={[0, 5, 5, 0]}>
+                                    {chartData.map((e, i) => <Cell key={i} fill={e.color} />)}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    )}
                 </div>
 
+                {/* Real headlines feed */}
                 <div className="card chart-card">
                     <div className="section-title">
-                        <PieIcon size={13} /> Scam Category Split
+                        <Newspaper size={13} /> Recent Fraud Reports
+                        <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--text-muted)', fontWeight: 400 }}>
+                            Live · NewsAPI
+                        </span>
                     </div>
-                    <ResponsiveContainer width="100%" height={220}>
-                        <PieChart>
-                            <Pie data={PIE_DATA} cx="50%" cy="50%" innerRadius={58} outerRadius={88} paddingAngle={3} dataKey="value" strokeWidth={0}>
-                                {PIE_DATA.map((e, i) => (
-                                    <Cell key={i} fill={e.color} />
-                                ))}
-                            </Pie>
-                            <Tooltip
-                                formatter={(v, n) => [`${v}%`, n]}
-                                contentStyle={{ background: 'rgba(10,14,28,0.97)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 8, fontSize: 12 }}
-                                labelStyle={{ color: '#64748b' }}
-                                itemStyle={{ color: '#f1f5f9' }}
-                            />
-                            <Legend wrapperStyle={{ fontSize: 11, color: '#64748b' }} iconSize={8} />
-                        </PieChart>
-                    </ResponsiveContainer>
+                    {loading ? (
+                        <div style={{ color: 'var(--text-muted)', fontSize: 12, padding: '40px 0', textAlign: 'center' }}>Loading headlines...</div>
+                    ) : (
+                        <div>
+                            {headlines.slice(0, 6).map((h, i) => (
+                                <div key={i} className="headline-item">
+                                    <div className="headline-title">
+                                        {h.url && h.url !== '#' ? (
+                                            <a href={h.url} target="_blank" rel="noopener noreferrer"
+                                                style={{ color: 'inherit', textDecoration: 'none' }}
+                                                onMouseOver={e => e.currentTarget.style.color = 'var(--accent-light)'}
+                                                onMouseOut={e => e.currentTarget.style.color = 'inherit'}
+                                            >
+                                                {h.title}
+                                            </a>
+                                        ) : h.title}
+                                    </div>
+                                    <div className="headline-meta">
+                                        <span className="headline-cat">{h.category}</span>
+                                        <span className="headline-dot">·</span>
+                                        <span className="headline-source">{h.source}</span>
+                                        <span className="headline-dot">·</span>
+                                        <span className="headline-date">{h.publishedAt?.slice(0, 10)}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
-            {/* Live Ticker */}
-            <div className="ticker-wrap">
-                <span className="ticker-label">LIVE</span>
-                <span className="ticker-content">{TICKER_ITEMS[tickerIdx]}</span>
+            {/* ── Data source footer ── */}
+            <div className="card" style={{ padding: '12px 18px', marginTop: 4 }}>
+                <div style={{ fontSize: 11.5, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Radio size={11} style={{ flexShrink: 0 }} />
+                    Powered by <strong style={{ color: 'var(--accent-light)', margin: '0 4px' }}>NewsAPI</strong>
+                    · cached 30 min · no repeated key calls ·
+                    <a href="https://cybercrime.gov.in" target="_blank" rel="noreferrer"
+                        style={{ color: 'var(--accent-light)', marginLeft: 4, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                        Report fraud <ExternalLink size={10} style={{ display: 'inline' }} />
+                    </a>
+                </div>
             </div>
         </div>
     );

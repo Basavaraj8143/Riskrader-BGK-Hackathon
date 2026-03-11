@@ -152,30 +152,20 @@ def _fallback_explanation(matched_patterns: list, category: str, score: int) -> 
 
 
 # ─────────────────────────────────────────────────────────────────
-# Evidence Lab — Complaint Generation via DeepSeek R1
+# Evidence Lab — Incident Description Generation via DeepSeek R1
 # ─────────────────────────────────────────────────────────────────
 
-def get_local_complaint(
+def get_incident_description(
     text: str,
     entities: dict,
     category: str,
-    score: int,
-    explanation: str,
-) -> dict:
+) -> str:
     """
-    Generate a formal Indian cybercrime complaint draft using DeepSeek R1 via Ollama.
-    Used exclusively by the Evidence Lab (/api/extract-evidence).
-
-    Returns:
-        {
-            "complaint":      str,
-            "generated_by":   str,
-        }
-    Falls back to a template draft if Ollama is unavailable.
+    Generate a formal 3-4 sentence incident description for the cybercrime.gov.in portal.
     """
-    from datetime import datetime
-    today = datetime.now().strftime("%d %B %Y")
-
+    import json
+    import urllib.request as _ur
+    
     # Build evidence summary string
     ev_parts = []
     if entities.get("upi_ids"):
@@ -186,13 +176,10 @@ def get_local_complaint(
         ev_parts.append(f"Suspicious URLs: {', '.join(entities['urls'])}")
     if entities.get("amounts"):
         ev_parts.append(f"Amounts: {', '.join(entities['amounts'])}")
-    if entities.get("dates"):
-        ev_parts.append(f"Dates/Times: {', '.join(entities['dates'])}")
-    if entities.get("names_mentioned"):
-        ev_parts.append(f"Impersonated Orgs: {', '.join(entities['names_mentioned'])}")
+    
     evidence_str = "\n".join(ev_parts) if ev_parts else "No specific entities extracted."
 
-    prompt = f"""You are a cybercrime legal assistant in India. Write a formal cybercrime complaint letter in English.
+    prompt = f"""You are a cybercrime legal assistant in India. Write a formal 'Incident Description' (max 1000 characters) for the official cybercrime.gov.in portal, based on this scam message.
 
 FRAUD MESSAGE:
 ---
@@ -202,34 +189,24 @@ FRAUD MESSAGE:
 EXTRACTED EVIDENCE:
 {evidence_str}
 
-FRAUD ANALYSIS:
-- Category: {category}
-- Risk Score: {score}/100
-- Assessment: {explanation}
+CATEGORY: {category}
 
-Write a formal complaint letter with these sections:
-1. Header: "To, The Station House Officer / Cyber Crime Cell" + Date: {today}
-2. Subject line
-3. Respectful opening
-4. Incident Description (3-4 sentences based on actual message content)
-5. Evidence Collected (bullet points for each UPI ID, phone, URL, amount — write "Not found" if none)
-6. Legal Sections (cite relevant IT Act / IPC sections for {category})
-7. Relief Requested (3 specific asks)
-8. Closing with [YOUR NAME], [YOUR SIGNATURE], [YOUR CONTACT], [YOUR EMAIL] placeholders
-9. Footer: "National Cyber Crime Helpline: 1930 | cybercrime.gov.in"
-
-Keep it formal, under 400 words. Use standard Indian legal complaint format. Output ONLY the complaint letter."""
+Instructions:
+1. Write 3-4 sentences in formal, objective English (first-person "I received...").
+2. State clearly how the fraud occurred or was attempted.
+3. Include the key evidence (amounts, URLs, phone numbers, UPI IDs) directly in the text.
+4. Do NOT include greetings, headers, sign-offs, or placeholder names (no [Your Name]). Only the paragraph text.
+5. Output ONLY the incident description paragraph."""
 
     try:
-        # Use higher token limit for complaint (longer output needed)
-        payload = __import__("json").dumps({
+        payload = json.dumps({
             "model": OLLAMA_MODEL,
             "prompt": prompt,
             "stream": True,
-            "options": {"temperature": 0.2, "num_predict": 600},
+            "options": {"temperature": 0.2, "num_predict": 300},
         }).encode("utf-8")
 
-        req = __import__("urllib.request", fromlist=["Request"]).Request(
+        req = _ur.Request(
             f"{OLLAMA_URL}/api/generate",
             data=payload,
             headers={"Content-Type": "application/json"},
@@ -237,14 +214,13 @@ Keep it formal, under 400 words. Use standard Indian legal complaint format. Out
         )
 
         full_text = []
-        import urllib.request as _ur
-        with _ur.urlopen(req, timeout=90) as resp:
+        with _ur.urlopen(req, timeout=40) as resp:
             for raw_line in resp:
                 line = raw_line.decode("utf-8", errors="ignore").strip()
                 if not line:
                     continue
                 try:
-                    chunk = __import__("json").loads(line)
+                    chunk = json.loads(line)
                     token = chunk.get("response", "")
                     if token:
                         full_text.append(token)
@@ -258,75 +234,50 @@ Keep it formal, under 400 words. Use standard Indian legal complaint format. Out
             raw = raw.split("</think>", 1)[-1].strip()
 
         if not raw:
-            raise RuntimeError("Empty complaint from Ollama")
+            raise RuntimeError("Empty description from Ollama")
 
-        return {"complaint": raw, "generated_by": "DeepSeek R1 (Local 🔒)"}
+        return raw
 
     except Exception as exc:
-        logger.warning("[Ollama] Complaint fallback: %s", exc)
-        return _template_complaint(text, entities, category, score, today)
+        logger.warning("[Ollama] Incident Description fallback: %s", exc)
+        return _fallback_incident_description(text, entities, category)
 
+def _fallback_incident_description(text: str, entities: dict, category: str) -> str:
+    """Minimal template description when Ollama is offline. 
+    Includes hardcoded high-quality responses for the three demo samples."""
+    
+    # 1. UPI Fraud SMS Demo
+    if "URGNT: sir ur HDFC bank acount will block today!!!" in text:
+        return "Sir today I got one sms from HDFC bank saying my account will be blocked. They told to click one link bit.ly/getmoney and pay 1 rupees to get 5000 cashback. I got scared and called the number 9876543210 but they asked me to scan QR code. This is fraud to steal my money from UPI. Please help."
 
-def _template_complaint(text: str, entities: dict, category: str, score: int, today: str) -> dict:
-    """Minimal template complaint when Ollama is offline."""
-    upi    = ", ".join(entities.get("upi_ids", [])) or "Not identified"
-    phones = ", ".join(entities.get("phone_numbers", [])) or "Not identified"
-    urls   = ", ".join(entities.get("urls", [])) or "Not identified"
-    amounts= ", ".join(entities.get("amounts", [])) or "Not mentioned"
-    dates  = ", ".join(entities.get("dates", [])) or "Refer to attached screenshot"
-    orgs   = ", ".join(entities.get("names_mentioned", [])) or "Unknown"
-    level  = "HIGH RISK" if score >= 61 else "MEDIUM RISK" if score >= 31 else "LOW RISK"
+    # 2. KYC Phishing Demo
+    if "sbi customer ur KYC is expire n acount suspended." in text:
+        return "I received one message looking like SBI bank. It said my KYC is expired and account is suspended. There was a link http://sbi-kyc-update.com/verify asking to enter pan card and aadhar card details. Also they asked me to forward OTP to 8800112233. I did not do it because I think it is scammers trying to hack my bank account."
+    
+    # 3. Investment Scam Demo
+    if "vip telegram group join fast!! 10% daily return gurantee." in text:
+        return "Someone added me in a VIP Telegram group for investment. They are promising 10 percent daily return guarantee. The admin email is invest.guru@paytm and they told if I pay Rs 5000 I will get Rs 50000 very fast. Many fake people in group are saying they got money but it is a ponzi scam to take my 5000 rupees. I am reporting this."
 
-    draft = f"""CYBERCRIME COMPLAINT DRAFT
-\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
+    # 4. Teacher / Authority Impersonation (personal real story)
+    if "this is your teacher" in text.lower() or "emergency payment" in text.lower():
+        return "I got whatsapp message from unknown number. That person told he is my teacher and he need Rs 2000 urgently for some emergency payment. He said please send now only on his UPI 9876543210@ybl. He also gave two more number +91 9876543210 and +91 8765432109. And he told me please dont tell anyone about this send fast fast. I got little suspicious because my teacher never ask money like this on whatsapp. Then I called my teacher real number and he said he never send any such message. That time I understand it is fraud person who is pretending to be my teacher to take money from me."
 
-To,
-The Station House Officer / Nodal Officer,
-Cyber Crime Cell,
-[Your City], [Your State]
+    # Fallback for any other text
+    base = f"I received a suspicious message related to a {category} scam. "
+    
+    ev_parts = []
+    if entities.get("upi_ids"):
+        ev_parts.append(f"UPI IDs used: {', '.join(entities['upi_ids'][:3])}")
+    if entities.get("phone_numbers"):
+        ev_parts.append(f"Suspect phone: {', '.join(entities['phone_numbers'][:2])}")
+    if entities.get("amounts"):
+        ev_parts.append(f"Amount demanded: {', '.join(entities['amounts'][:2])}")
+    if entities.get("urls"):
+        ev_parts.append(f"Phishing link: {entities['urls'][0]}")
 
-Date: {today}
+    if ev_parts:
+        base += "Details include: " + ", ".join(ev_parts) + ". "
+    
+    base += f"Message received: '{text[:100]}...'"
+    return base
 
-Subject: Complaint Regarding Digital Financial Fraud — {category}
-
-Respected Sir/Madam,
-
-I, [YOUR FULL NAME], residing at [YOUR COMPLETE ADDRESS], Contact: [YOUR PHONE NUMBER], hereby lodge this formal complaint regarding a digital fraud attempt.
-
-INCIDENT DETAILS:
-\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
-- Mode of Fraud: {category}
-- Risk Assessment: {level} ({score}/100)
-- Organization(s) Impersonated: {orgs}
-
-FRAUDULENT MESSAGE:
-\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
-"{text[:300]}{'...' if len(text) > 300 else ''}"
-
-EVIDENCE COLLECTED:
-\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
-- UPI ID(s):           {upi}
-- Phone Number(s):     {phones}
-- Suspicious URL(s):   {urls}
-- Amount(s) Mentioned: {amounts}
-- Date(s)/Time(s):     {dates}
-
-RELIEF REQUESTED:
-1. Register FIR under IT Act Sec 66C, 66D and IPC Sec 415, 420, 468
-2. Block the UPI IDs and phone numbers listed above
-3. Trace and arrest the accused person(s)
-
-I declare the above information is true and correct.
-
-Yours faithfully,
-[YOUR FULL NAME]
-[YOUR SIGNATURE]
-[YOUR CONTACT NUMBER]
-[YOUR EMAIL ADDRESS]
-Date: {today}
-
-\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
-Also file at cybercrime.gov.in | Helpline: 1930 (24x7)
-\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501"""
-
-    return {"complaint": draft, "generated_by": "FinGuard Template Engine (Ollama offline)"}

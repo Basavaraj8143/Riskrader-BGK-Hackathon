@@ -23,6 +23,7 @@ SUBCATEGORY_MAP = {
     "OTP Theft":              "UPI Related Frauds",
     "Crypto Scam":            "Demat / Depository Fraud",
     "Parcel / Customs Scam":  "Fraud Call / Vishing",
+    "Authority Impersonation": "Fraud Call / Vishing",
     "General":                "Other",
 }
 
@@ -66,34 +67,7 @@ def _build_suspect_identifiers(entities: dict) -> list:
     return identifiers
 
 
-def _build_incident_description(
-    original_text: str,
-    entities: dict,
-    category: str,
-    explanation: str,
-) -> str:
-    """
-    Build a ~300-400 char incident description suitable for the portal.
-    Uses AI explanation as the base and appends key evidence.
-    """
-    ev_parts = []
-    if entities.get("upi_ids"):
-        ev_parts.append(f"UPI IDs used: {', '.join(entities['upi_ids'][:3])}")
-    if entities.get("phone_numbers"):
-        ev_parts.append(f"Suspect phone: {', '.join(entities['phone_numbers'][:2])}")
-    if entities.get("amounts"):
-        ev_parts.append(f"Amount demanded: {', '.join(entities['amounts'][:2])}")
-    if entities.get("urls"):
-        ev_parts.append(f"Phishing link: {entities['urls'][0]}")
 
-    base = explanation.strip().rstrip(".")
-    if ev_parts:
-        base = base + ". " + ". ".join(ev_parts) + "."
-
-    # Truncate to ~1000 chars (well within 1500 max)
-    if len(base) > 1000:
-        base = base[:997] + "..."
-    return base
 
 
 def build_portal_guide(
@@ -104,6 +78,7 @@ def build_portal_guide(
     level: str,
     explanation: str,
     matched_patterns: list,
+    incident_description: str = "",
 ) -> dict:
     """
     Build the full portal_guide structure matching cybercrime.gov.in sections.
@@ -113,7 +88,7 @@ def build_portal_guide(
     subcategory = SUBCATEGORY_MAP.get(category, "Other")
     platform = _detect_platform(original_text)
     identifiers = _build_suspect_identifiers(entities)
-    incident_desc = _build_incident_description(original_text, entities, category, explanation)
+    incident_desc = incident_description or explanation
     today = datetime.now().strftime("%Y-%m-%d")
 
     return {

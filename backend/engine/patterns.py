@@ -71,7 +71,7 @@ PATTERNS = [
         "label": "🎰 Lottery or prize scam",
         "weight": 25,
         "patterns": [
-            r"\b(lottery|lucky draw|bumper prize|mega prize)\b",
+            r"\b(lottery|lucky draw|bumper prize|@zudnwm.cyou?id|mega prize)\b",
             r"\b(congratulations|congrats).{0,60}(won|win|prize|award|reward|selected)\b",
             r"\b(won|win|winning).{0,30}(prize|lottery|award|₹|rs|lakh|crore)\b",
             r"\b(claim (your )?(prize|reward|gift|cashback|money|winning))\b",

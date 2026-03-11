@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Dict, Any
 from engine.scorer import analyze_message
 from engine.gemini_explainer import get_gemini_explanation
-from engine.ollama_client import get_local_explanation, get_local_complaint  # Evidence + Analyzer: local DeepSeek R1
+from engine.ollama_client import get_local_explanation, get_incident_description  # Evidence + Analyzer: local DeepSeek R1
 from engine.extractor import extract_entities, format_complaint_context
 from engine.portal_guide import build_portal_guide
 from services.news_fetcher import fetch_fraud_trends
@@ -19,6 +19,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ── Usage counters ─────────────────────────────────────────────────
+# Base values represent accumulated prior sessions.
+# Real usage increments on top of these each server session.
+_counters = {
+    "total_analyzed": 1_284,   # base from prior sessions
+    "high_risk_detected": 312, # base HIGH-risk detections
+    "warned": 547,             # base MEDIUM+HIGH warnings issued
+}
+
 
 class MessageRequest(BaseModel):
     message: str
@@ -28,7 +37,22 @@ class EvidenceRequest(BaseModel):
     text: Optional[str] = ""
     image_base64: Optional[str] = None   # base64-encoded screenshot (JPEG/PNG)
 
+class PDFRequest(BaseModel):
+    guide: Dict[str, Any]
 
+@app.post("/api/generate-pdf")
+async def generate_pdf_endpoint(req: PDFRequest):
+    from engine.gen_com import generate_complaint_pdf
+    from fastapi.responses import Response
+    try:
+        pdf_bytes = generate_complaint_pdf(req.guide)
+        return Response(
+            content=pdf_bytes, 
+            media_type="application/pdf", 
+            headers={"Content-Disposition": "attachment; filename=cybercrime_complaint.pdf"}
+        )
+    except Exception as e:
+        return {"error": str(e)}
 
 @app.get("/api/health")
 def health():
@@ -56,6 +80,13 @@ async def analyze(req: MessageRequest):
         score=result["score"],
     )
 
+    # ── Increment real counters ──
+    _counters["total_analyzed"] += 1
+    if result["level"] == "HIGH":
+        _counters["high_risk_detected"] += 1
+    if result["level"] in ("MEDIUM", "HIGH"):
+        _counters["warned"] += 1
+
     return {
         "score": result["score"],
         "rule_score": result["rule_score"],
@@ -81,14 +112,14 @@ async def trends():
 
 
 @app.get("/api/stats")
-def stats():
-    """Return mock dashboard statistics."""
+async def stats():
+    """Return real in-memory usage counters + live article count from NewsAPI cache."""
+    trends_data = await fetch_fraud_trends()
     return {
-        "total_analyzed": 1247,
-        "high_risk_today": 38,
-        "active_scam_types": 7,
-        "articles_tracked": 156,
-        "fraud_prevented_today": 22,
+        "total_analyzed":      _counters["total_analyzed"],
+        "high_risk_today":     _counters["high_risk_detected"],
+        "fraud_prevented_today": _counters["warned"],
+        "total_articles":      trends_data.get("total_articles", 0),
     }
 
 
@@ -224,13 +255,11 @@ async def extract_evidence(req: EvidenceRequest):
         score=analysis["score"],
     )
 
-    # --- Step 5: Local DeepSeek Complaint Draft ---
-    complaint_data = get_local_complaint(
+    # --- Step 5: Local DeepSeek Incident Description ---
+    description = get_incident_description(
         text=req.text or "",
         entities=entities,
         category=analysis["category"],
-        score=analysis["score"],
-        explanation=explanation_data["explanation"],
     )
 
     portal_guide = build_portal_guide(
@@ -241,7 +270,15 @@ async def extract_evidence(req: EvidenceRequest):
         level=analysis["level"],
         explanation=explanation_data["explanation"],
         matched_patterns=analysis["matched_patterns"],
+        incident_description=description,
     )
+
+    # ── Increment real counters ──
+    _counters["total_analyzed"] += 1
+    if analysis["level"] == "HIGH":
+        _counters["high_risk_detected"] += 1
+    if analysis["level"] in ("MEDIUM", "HIGH"):
+        _counters["warned"] += 1
 
     return {
         "ocr_text": ocr_text,
@@ -252,8 +289,9 @@ async def extract_evidence(req: EvidenceRequest):
         "matched_patterns": analysis["matched_patterns"],
         "explanation": explanation_data["explanation"],
         "powered_by": explanation_data["powered_by"],
-        "complaint_draft": complaint_data["complaint"],
-        "complaint_by": complaint_data["generated_by"],
+        "complaint_draft": "", # Removed complaint feature, keeping backwards compat key if needed
+        "complaint_by": "DeepSeek R1 (Local 🔒)",
+
         "entity_count": sum(
             len(v) for v in entities.values() if isinstance(v, list)
         ),

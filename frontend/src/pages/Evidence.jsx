@@ -22,6 +22,7 @@ const SAMPLES = [
     { label: 'UPI Fraud SMS', text: 'URGNT: sir ur HDFC bank acount will block today!!! clam ur UPI cashback Rs 5000 fast. pay Rs 1 only to receive. scan QR code or click link bit.ly/getmoney . customer care number 9876543210' },
     { label: 'KYC Phishing', text: 'sbi customer ur KYC is expire n acount suspended. click fast http://sbi-kyc-update.com/verify to update PAN and aadhaar card dtls. forward OTP to 8800112233 for verification.' },
     { label: 'Investment Scam', text: 'vip telegram group join fast!! 10% daily return gurantee. members earning big profit every day. u pay Rs 5000 and get Rs 50000. msg admin invest.guru@paytm' },
+    { label: '⭐ My Real Story', personal: true, text: 'I got whatsapp message from unknown number. That person told he is my teacher and he need Rs 2000 urgently for some emergency payment. He said please send now only on his UPI 9876543210@ybl. He also gave two more number +91 9876543210 and +91 8765432109 for contact. And he told me please dont tell anyone about this, send fast fast. I got little suspicious because my teacher never ask money like this on whatsapp. Then I called my teacher real number and he said he never send any such message. That time I understand it is fraud person who is pretending to be my teacher to take money from me.' },
 ];
 
 const PLATFORMS = ['Email', 'Facebook', 'Instagram', 'Snapchat', 'Twitter', 'WhatsApp', 'Website URL', 'YouTube', 'LinkedIn', 'Telegram', 'Mobile App', 'SMS', 'Other'];
