@@ -6,6 +6,24 @@ from . import ml_model as _ml
 _ml.load_model()
 
 
+def _extract_amounts(text: str):
+    """
+    Extract rupee amounts from text.
+    Example: 'Pay Rs 1 get Rs 50000' → [1, 50000]
+    """
+    pattern = r"(?:rs\.?|₹)?\s*(\d{1,7})"
+    matches = re.findall(pattern, text.lower())
+
+    amounts = []
+    for m in matches:
+        try:
+            amounts.append(int(m))
+        except:
+            pass
+
+    return amounts
+
+
 def analyze_message(text: str) -> dict:
     """
     Hybrid fraud risk scoring engine.
@@ -48,6 +66,29 @@ def analyze_message(text: str) -> dict:
     invest_hits = sum(1 for p in invest_signals if re.search(p, text_lower, re.IGNORECASE))
     if invest_hits >= 2:
         rule_score += invest_hits * 8
+
+    # ---- Unrealistic Return Detection (Math-based) ----
+    amounts = _extract_amounts(text_lower)
+
+    if len(amounts) >= 2:
+        requested = min(amounts)
+        promised = max(amounts)
+
+        if requested > 0:
+            ratio = promised / requested
+
+            if ratio >= 100:
+                rule_score += 45
+                matched.append("💰 Unrealistic return promise")
+            elif ratio >= 20:
+                rule_score += 20
+                matched.append("💰 Suspicious high return")
+            elif ratio >= 5:
+                rule_score += 12
+                matched.append("💰 Pay-less-get-more scheme")
+            elif ratio >= 2:
+                rule_score += 8
+                matched.append("💰 Suspicious return offer")
 
     # ---- Cap rule score at 100 ----
     rule_score = min(rule_score, 100)

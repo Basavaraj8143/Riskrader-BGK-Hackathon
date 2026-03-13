@@ -503,7 +503,7 @@ class WhatsAppOCRFraudDetector {
                 // Step 4: Display results
                 this.displayResults(result, extractedText);
                 statusDiv.innerHTML = '<span>✅ Analysis complete!</span>';
-            }, 15000); // 15 second delay
+            }, 7000); // 10 second delay
 
         } catch (error) {
             console.error('FinGuard OCR Error:', error);

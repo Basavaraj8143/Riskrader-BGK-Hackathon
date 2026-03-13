@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>RiskRadar Settings</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      display: flex;
+      justify-content: center;
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 520px;
+    }
+
+    h1 {
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #94a3b8;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Toggle Switch */
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+    }
+
+    .setting-row:last-child {
+      border-bottom: none;
+    }
+
+    .setting-info {
+      flex: 1;
+    }
+
+    .setting-label {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .setting-desc {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+      margin-left: 16px;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #475569;
+      border-radius: 24px;
+      transition: 0.3s;
+    }
+
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+
+    .toggle input:checked + .toggle-slider {
+      background: #6366f1;
+    }
+
+    .toggle input:checked + .toggle-slider::before {
+      transform: translateX(20px);
+    }
+
+    /* Slider */
+    .slider-row {
+      padding: 12px 0;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .slider-value {
+      font-weight: 600;
+      color: #6366f1;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: #334155;
+      border-radius: 6px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #6366f1;
+      cursor: pointer;
+      box-shadow: 0 0 6px rgba(99, 102, 241, 0.4);
+    }
+
+    /* Buttons */
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: #1e293b;
+      color: #94a3b8;
+      border: 1px solid #334155;
+    }
+
+    .btn-secondary:hover {
+      background: #283548;
+      color: #e2e8f0;
+    }
+
+    .save-msg {
+      text-align: center;
+      margin-top: 12px;
+      font-size: 13px;
+      color: #10b981;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .save-msg.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>RiskRadar Settings</h1>
+    <p class="subtitle">Configure how RiskRadar protects your browsing.</p>
+
+    <div class="card">
+      <div class="card-title">Scanning</div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-label">Auto-Scan Links</div>
+          <div class="setting-desc">Automatically scan all links as you browse and scroll.</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="autoScan" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-label">WhatsApp Web Scanning</div>
+          <div class="setting-desc">Scan incoming messages on web.whatsapp.com for threats.</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="whatsappScan" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-header">
+          <div>
+            <div class="setting-label">Risk Threshold</div>
+            <div class="setting-desc">Only flag items above this risk score.</div>
+          </div>
+          <span class="slider-value" id="thresholdValue">50%</span>
+        </div>
+        <input type="range" id="threshold" min="10" max="90" value="50" step="5">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Notifications</div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-label">Browser Notifications</div>
+          <div class="setting-desc">Show system notifications for high-risk context menu scans.</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="notifications" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-label">Page Overlay Alerts</div>
+          <div class="setting-desc">Show overlay notifications on the webpage for scan results.</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="overlayAlerts" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-secondary" id="resetBtn">Reset Defaults</button>
+      <button class="btn btn-primary" id="saveBtn">Save Settings</button>
+    </div>
+
+    <div class="save-msg" id="saveMsg">Settings saved successfully!</div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
