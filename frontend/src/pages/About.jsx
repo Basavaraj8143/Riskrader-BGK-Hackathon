@@ -29,7 +29,7 @@ export default function About() {
                     <Info size={11} /> Project Overview
                 </div>
                 <h1 className="page-title">
-                    About <span className="highlight">FinGuard AI</span>
+                    About <span className="highlight">RiskRadar</span>
                 </h1>
             </div>
 
@@ -40,7 +40,7 @@ export default function About() {
                 </div>
                 <div className="about-title">Fighting Fraud<br />with Intelligence</div>
                 <p className="about-sub">
-                    FinGuard AI is a real-time fraud intelligence dashboard built to protect India's 500M+ digital payment users
+                    RiskRadar is a real-time fraud intelligence dashboard built to protect India's 500M+ digital payment users
                     from UPI scams, phishing attacks, fake loan apps, and investment frauds.
                 </p>
             </div>

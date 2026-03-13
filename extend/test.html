@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>RiskRadar — Extension Test Page</title>
+  <style>
+    body { font-family: sans-serif; background: #0f172a; color: #e2e8f0; padding: 40px; max-width: 640px; margin: auto; }
+    h1 { color: #f1f5f9; margin-bottom: 4px; }
+    p  { color: #64748b; font-size: 13px; margin-bottom: 32px; }
+    .group { margin-bottom: 28px; }
+    .group h2 { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #475569; margin-bottom: 12px; border-bottom: 1px solid #1e293b; padding-bottom: 6px; }
+    a  { display: block; padding: 10px 14px; margin-bottom: 8px; border-radius: 8px;
+         font-size: 12.5px; border: 1px solid #1e293b; transition: border-color .15s; word-break: break-all; }
+    a:hover { border-color: #475569; }
+    .high   { background: rgba(239,68,68,0.07);  color: #fca5a5; }
+    .medium { background: rgba(234,179,8,0.07);  color: #fde68a; }
+    .safe   { background: rgba(34,197,94,0.07);  color: #86efac; }
+    .why { font-size: 10px; color: #475569; margin-top: 4px; }
+    .note { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 12px 16px; font-size: 12px; color: #64748b; margin-bottom: 28px; }
+  </style>
+</head>
+<body>
+  <h1>🛡 RiskRadar Extension Test</h1>
+  <p>Click any link — the extension intercepts it and scores the URL using your backend.</p>
+
+  <div class="note">
+    ⚠️ Make sure <strong>backend is running</strong> on <code>localhost:8000</code> and the extension is loaded in Chrome.
+    After reloading the extension, <strong>refresh this page</strong> before clicking links.
+  </div>
+
+  <div class="group">
+    <h2>🔴 Expected: HIGH risk overlay</h2>
+
+    <!-- Real Google search URL packed with fraud keywords — guaranteed to exist + score HIGH -->
+    <a class="high" href="https://www.google.com/search?q=SBI+kyc+update+otp+verify+account+blocked+urgent+claim+upi+paytm">
+      google.com/search?q=SBI+kyc+update+otp+verify+account+blocked+urgent+claim+upi+paytm
+      <div class="why">↳ Real URL · Fraud keywords: KYC, OTP, UPI, urgent, claim, verify, blocked</div>
+    </a>
+
+    <a class="high" href="https://www.google.com/search?q=lottery+winner+claim+prize+guaranteed+returns+invest+whatsapp+group+daily+income">
+      google.com/search?q=lottery+winner+claim+prize+guaranteed+returns+invest+daily+income
+      <div class="why">↳ Real URL · Fraud keywords: lottery, prize, guaranteed returns, daily income, WhatsApp</div>
+    </a>
+
+    <a class="high" href="https://www.youtube.com/results?search_query=send+otp+upi+paytm+kyc+expired+account+blocked+verify+bank+details+urgent">
+      youtube.com/search?q=send+otp+upi+paytm+kyc+expired+account+blocked+verify+urgent
+      <div class="why">↳ Real URL · Fraud keywords: OTP, KYC, urgent, verify, bank, account blocked</div>
+    </a>
+  </div>
+
+  <div class="group">
+    <h2>🟡 Expected: MEDIUM risk overlay</h2>
+
+    <a class="medium" href="https://www.google.com/search?q=HDFC+bank+account+suspended+update+netbanking+details">
+      google.com/search?q=HDFC+bank+account+suspended+update+netbanking+details
+      <div class="why">↳ Real URL · Fraud keywords: HDFC bank, suspended, netbanking</div>
+    </a>
+
+    <a class="medium" href="https://www.google.com/search?q=RBI+TRAI+income+tax+department+notice+legal+action+FIR">
+      google.com/search?q=RBI+TRAI+income+tax+department+notice+legal+action+FIR
+      <div class="why">↳ Real URL · Fraud keywords: RBI, TRAI, income tax, legal action, FIR</div>
+    </a>
+  </div>
+
+  <div class="group">
+    <h2>🟢 Expected: No overlay (silently navigates)</h2>
+
+    <a class="safe" href="https://cybercrime.gov.in">
+      cybercrime.gov.in — Official India cybercrime portal
+    </a>
+    <a class="safe" href="https://github.com/Basavaraj8143/Riskrader-BGK-Hackathon">
+      github.com — RiskRadar repo
+    </a>
+    <a class="safe" href="https://www.npci.org.in">
+      npci.org.in — NPCI official site
+    </a>
+  </div>
+
+</body>
+</html>

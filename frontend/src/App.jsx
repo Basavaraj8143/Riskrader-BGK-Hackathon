@@ -2,19 +2,22 @@ import { BrowserRouter, Routes, Route, NavLink, useLocation } from 'react-router
 import { useState, useEffect } from 'react';
 import {
   LayoutDashboard, ScanLine, FlaskConical, BookOpen, Info,
-  ShieldAlert, Clock
+  ShieldAlert, Clock, ShieldCheck, MessageCircle, X
 } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import Analyzer from './pages/Analyzer';
 import Evidence from './pages/Evidence';
 import Encyclopedia from './pages/Encyclopedia';
 import About from './pages/About';
+import Awareness from './pages/Awareness';
+import ChatAssistant from './components/ChatAssistant';
 
 const NAV_ITEMS = [
   { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
   { path: '/analyzer', icon: ScanLine, label: 'Analyzer' },
   { path: '/evidence', icon: FlaskConical, label: 'Evidence Lab' },
   { path: '/encyclopedia', icon: BookOpen, label: 'Research Lab' },
+  { path: '/awareness', icon: ShieldCheck, label: 'Awareness' },
   { path: '/about', icon: Info, label: 'About' },
 ];
 
@@ -23,13 +26,14 @@ const PAGE_META = {
   '/analyzer': { title: 'Analyzer', sub: 'Message Intelligence' },
   '/evidence': { title: 'Evidence Lab', sub: 'Complaint Generator' },
   '/encyclopedia': { title: 'Research Lab', sub: 'Fraud Research' },
-  '/about': { title: 'About', sub: 'FinGuard AI' },
+  '/awareness': { title: 'Awareness', sub: 'Cybersecurity Guide' },
+  '/about': { title: 'About', sub: 'RiskRadar' },
 };
 
 function Topbar() {
   const { pathname } = useLocation();
   const [time, setTime] = useState(new Date());
-  const meta = PAGE_META[pathname] || { title: 'FinGuard AI', sub: '' };
+  const meta = PAGE_META[pathname] || { title: 'RiskRadar', sub: '' };
 
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 1000);
@@ -40,7 +44,7 @@ function Topbar() {
     <div className="topbar">
       <div className="topbar-left">
         <div>
-          <div className="topbar-breadcrumb">FinGuard AI / {meta.sub}</div>
+          <div className="topbar-breadcrumb">RiskRadar / {meta.sub}</div>
           <div className="topbar-title">{meta.title}</div>
         </div>
       </div>
@@ -69,7 +73,7 @@ function Sidebar() {
             </div>
           </div>
           <div className="brand-text">
-            <div className="brand-name">FinGuard AI</div>
+            <div className="brand-name">RiskRadar</div>
             <div className="brand-tagline">Fraud Intelligence</div>
           </div>
         </div>
@@ -111,6 +115,8 @@ function Sidebar() {
 }
 
 export default function App() {
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
   return (
     <BrowserRouter>
       <div className="app-shell">
@@ -123,10 +129,22 @@ export default function App() {
               <Route path="/analyzer" element={<Analyzer />} />
               <Route path="/evidence" element={<Evidence />} />
               <Route path="/encyclopedia" element={<Encyclopedia />} />
+              <Route path="/awareness" element={<Awareness />} />
               <Route path="/about" element={<About />} />
             </Routes>
           </div>
         </div>
+
+        {/* Global Floating Chat Button */}
+        <button 
+          className={`floating-chat-btn ${isChatOpen ? 'hide-pulse' : ''}`} 
+          aria-label="Open AI Assistant"
+          onClick={() => setIsChatOpen(!isChatOpen)}
+        >
+          {isChatOpen ? <X size={24} /> : <MessageCircle size={24} />}
+        </button>
+
+        <ChatAssistant isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
       </div>
     </BrowserRouter>
   );

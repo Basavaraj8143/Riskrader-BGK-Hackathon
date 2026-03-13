@@ -31,7 +31,7 @@ const GENDERS = ['Male', 'Female', 'Other'];
 const RELATIONS = ['Father', 'Mother', 'Spouse'];
 
 // ── Profile persistence (localStorage) ───────────────────────────
-const PROFILE_KEY = 'finguard_complainant_profile';
+const PROFILE_KEY = 'riskradar_complainant_profile';
 // Fields that belong to the user's personal profile (saved across sessions)
 // Incident-specific fields (incidentDate, platform, delay, suspectName, consent)
 // are intentionally NOT part of the profile.

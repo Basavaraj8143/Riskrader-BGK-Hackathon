@@ -1,0 +1,151 @@
+/* styles.css — RiskRadar extension overlay */
+
+#rr-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  animation: rr-fade-in 0.18s ease;
+}
+
+@keyframes rr-fade-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+#rr-card {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 16px;
+  padding: 28px 32px;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+  color: #e2e8f0;
+}
+
+#rr-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+#rr-brand {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+#rr-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  margin-bottom: 12px;
+}
+
+#rr-badge.HIGH   { background: rgba(239,68,68,0.15);  color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+#rr-badge.MEDIUM { background: rgba(234,179,8,0.15);  color: #facc15; border: 1px solid rgba(234,179,8,0.3); }
+#rr-badge.LOW    { background: rgba(34,197,94,0.15);  color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+
+#rr-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #f1f5f9;
+}
+
+#rr-url {
+  font-size: 11.5px;
+  color: #475569;
+  word-break: break-all;
+  margin-bottom: 16px;
+  padding: 8px 10px;
+  background: #1e293b;
+  border-radius: 8px;
+  border: 1px solid #334155;
+}
+
+#rr-category {
+  font-size: 12.5px;
+  color: #94a3b8;
+  margin-bottom: 14px;
+}
+
+#rr-tips {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#rr-tips li {
+  font-size: 12px;
+  color: #94a3b8;
+  padding-left: 16px;
+  position: relative;
+  line-height: 1.5;
+}
+
+#rr-tips li::before {
+  content: "›";
+  position: absolute;
+  left: 0;
+  color: #475569;
+}
+
+#rr-score-bar-wrap {
+  height: 4px;
+  background: #1e293b;
+  border-radius: 99px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+#rr-score-bar {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}
+
+#rr-actions {
+  display: flex;
+  gap: 10px;
+}
+
+#rr-cancel, #rr-proceed {
+  flex: 1;
+  padding: 10px 0;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s;
+}
+
+#rr-cancel:hover, #rr-proceed:hover { opacity: 0.85; }
+
+#rr-cancel {
+  background: #1e293b;
+  color: #94a3b8;
+  border: 1px solid #334155;
+}
+
+#rr-proceed.HIGH   { background: #ef4444; color: #fff; }
+#rr-proceed.MEDIUM { background: #ca8a04; color: #fff; }
+#rr-proceed.LOW    { background: #16a34a; color: #fff; }
