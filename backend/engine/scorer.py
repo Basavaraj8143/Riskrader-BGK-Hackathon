@@ -1,4 +1,5 @@
 import re
+import math
 from .patterns import PATTERNS, CATEGORY_KEYWORDS, PREVENTION_TIPS
 from . import ml_model as _ml
 
@@ -67,7 +68,7 @@ def analyze_message(text: str) -> dict:
     if invest_hits >= 2:
         rule_score += invest_hits * 8
 
-    # ---- Unrealistic Return Detection (Math-based) ----
+    # ---- Unrealistic Return Detection (Logarithmic Method) ----
     amounts = _extract_amounts(text_lower)
 
     if len(amounts) >= 2:
@@ -76,19 +77,20 @@ def analyze_message(text: str) -> dict:
 
         if requested > 0:
             ratio = promised / requested
+            log_score = math.log(ratio + 1)
 
-            if ratio >= 100:
+            if log_score > 8:      # ~2980x return (extreme scams)
                 rule_score += 45
-                matched.append("💰 Unrealistic return promise")
-            elif ratio >= 20:
-                rule_score += 20
-                matched.append("💰 Suspicious high return")
-            elif ratio >= 5:
-                rule_score += 12
-                matched.append("💰 Pay-less-get-more scheme")
-            elif ratio >= 2:
-                rule_score += 8
-                matched.append("💰 Suspicious return offer")
+                matched.append("💰 Extreme unrealistic return")
+            elif log_score > 6:    # ~403x return
+                rule_score += 25
+                matched.append("💰 Unrealistic financial return")
+            elif log_score > 3:    # ~20x return
+                rule_score += 10
+                matched.append("💰 Suspicious reward ratio")
+            elif log_score > 1.5:  # ~3.5x return
+                rule_score += 5
+                matched.append("💰 Questionable return offer")
 
     # ---- Cap rule score at 100 ----
     rule_score = min(rule_score, 100)
