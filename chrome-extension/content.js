@@ -6,50 +6,269 @@
  */
 
 // ═══════════════════════════════════════════════════════
-// EMBEDDED SCANNER ENGINE
+// ADVANCED RISKRADAR SCANNER (Synced with Backend)
 // ═══════════════════════════════════════════════════════
 
 const RiskRadarScanner = (() => {
-  const SUSPICIOUS_TLDS = [
-    '.xyz', '.tk', '.ml', '.ga', '.cf', '.gq', '.buzz', '.top', '.club',
-    '.work', '.click', '.link', '.info', '.online', '.site', '.icu',
-    '.cam', '.rest', '.monster', '.surf', '.bar', '.uno'
+  
+  // ---- Advanced Pattern Database (from backend) ----
+  const PATTERNS = [
+    // ---- Urgency & Threat Language ----
+    {
+      "label": "⚠️ Urgency manipulation detected",
+      "weight": 20,
+      "patterns": [
+        /\b(immediately|urgent|urgently|asap|right now|last chance|act now)\b/gi,
+        /\b(within \d+ hours?|expires? (today|now|soon)|deadline)\b/gi,
+        /\b(block(ed)?|suspend(ed)?|deactivate[d]?|terminate[d]?)\b/gi,
+      ],
+    },
+    // ---- Bank / Financial Impersonation ----
+    {
+      "label": "🏦 Bank or financial impersonation",
+      "weight": 15,
+      "patterns": [
+        /\b(sbi|hdfc|icici|axis|kotak|pnb|punjab national|bank of baroda|canara|union bank)\b/gi,
+        /\b(your (bank|account|card|debit|credit|savings))\b/gi,
+        /\b(netbanking|internet banking|mobile banking|bank account)\b/gi,
+      ],
+    },
+    // ---- Government / Telecom Impersonation ----
+    {
+      "label": "🏛️ Government/Telecom impersonation",
+      "weight": 20,
+      "patterns": [
+        /\b(trai|bsnl|airtel|jio|vi|vodafone|income tax|it department|irdai|sebi)\b/gi,
+        /\b(rbi|reserve bank|government of india|ministry|uidai|aadhaar)\b/gi,
+        /\b(narcot(ics)?|cbi|ed |enforcement direct|police|legal action|fir|cyber crime cell)\b/gi,
+      ],
+    },
+    // ---- OTP / Credential Phishing ----
+    {
+      "label": "🔑 OTP or credential theft attempt",
+      "weight": 30,
+      "patterns": [
+        /\b(otp|one.?time.?password|pin|password|cvv|atm pin)\b/gi,
+        /\b(share (your|the) (otp|pin|password|code))\b/gi,
+        /\b(enter (your|the) (otp|details|credentials|information))\b/gi,
+      ],
+    },
+    // ---- KYC Scams ----
+    {
+      "label": "📋 KYC verification scam",
+      "weight": 15,
+      "patterns": [
+        /\b(kyc|know your customer|kyc (update|verify|expired|complete|pending))\b/gi,
+        /\b(update (your )?(kyc|pan|aadhaar|address|details))\b/gi,
+        /\b(kyc (required|mandatory|verification|process))\b/gi,
+      ],
+    },
+    // ---- UPI / Money Transfer Scams ----
+    {
+      "label": "💸 UPI payment fraud pattern",
+      "weight": 20,
+      "patterns": [
+        /\b(upi|gpay|google pay|phonepe|paytm|bhim)\b/gi,
+        /\b(send|pay|transfer) ?(₹|rs\.?|inr|rupees?) ?\d+.{0,20}(to receive|to get|to win|to claim)\b/gi,
+        /\b(scan (the )?qr|qr code|payment link)\b/gi,
+        /\b(cashback|refund|reimbursement) ?(of )?(₹|rs\.?|inr) ?\d+\b/gi,
+        /\b(pay|send) ?(₹|rs\.?|inr|rupees?) ?\d+.{0,30}(claim|receive|get|win)\b/gi,
+      ],
+    },
+    // ---- Lottery / Prize Scams ----
+    {
+      "label": "🎰 Lottery or prize scam",
+      "weight": 25,
+      "patterns": [
+        /\b(lottery|lucky draw|bumper prize|mega prize)\b/gi,
+        /\b(congratulations|congrats).{0,60}(won|win|prize|award|reward|selected)\b/gi,
+        /\b(won|win|winning).{0,30}(prize|lottery|award|₹|rs|lakh|crore)\b/gi,
+        /\b(claim (your )?(prize|reward|gift|cashback|money|winning))\b/gi,
+        /\b(lucky (winner|draw|number)|selected for prize|you have been selected)\b/gi,
+        /\b(kbc|kaun banega|big boss|ipl|bcci).{0,30}(winner|prize|lottery|lucky)\b/gi,
+      ],
+    },
+    // ---- Money Lure (pay/invest small get big) ----
+    {
+      "label": "💰 Pay-small-get-big money lure",
+      "weight": 25,
+      "patterns": [
+        /\b(pay|send|transfer|invest).{0,20}(₹|rs\.?|inr|rupees?) ?\d+.{0,30}(receive|get|win|claim|earn).{0,20}(₹|rs\.?|inr|rupees?) ?\d+\b/gi,
+        /\b(invest|pay|deposit) ?(₹|rs\.?|inr|rupees?) ?\d+.{0,20}(get|earn|receive|returns?).{0,20}(₹|rs\.?|inr|rupees?) ?\d+\b/gi,
+        /\b(₹|rs\.?|inr) ?\d+.{0,30}(get|earn|receive|returns?).{0,20}(₹|rs\.?|inr) ?\d{4,}\b/gi,
+        /\b(invest|pay|deposit) ?(small|\d+).{0,20}(get|earn|receive).{0,20}(big|\d+|lakh|crore)\b/gi,
+      ],
+    },
+    // ---- Investment / Ponzi Scams ----
+    {
+      "label": "📈 Investment fraud / Ponzi scheme",
+      "weight": 30,
+      "patterns": [
+        /\bguaranteed.{0,30}(returns?|profit|income|earning|roi)\b/gi,
+        /\b\d+\s*%.{0,20}(daily|weekly|per day|per week|per month|monthly)\s*(returns?|profit|earning|income)?\b/gi,
+        /\b(daily|weekly|monthly).{0,10}returns?\b/gi,
+        /\b(double|triple|10x|5x|2x).{0,20}(money|investment|returns?|profit)\b/gi,
+        /\b(whatsapp|telegram).{0,30}(group|channel|invest|earn|profit)\b/gi,
+        /\b(invest|investing).{0,20}(group|channel|plan|scheme|opportunity)\b/gi,
+        /\b(members?|users?|people).{0,20}(earning|earning daily|already earning|profiting)\b/gi,
+        /\b(exclusive|secret|elite|vip).{0,20}(group|channel|investment|trading)\b/gi,
+        /\b(\d+,\d+|\d+k\+?|thousands? of).{0,20}(members?|investors?|earning)\b/gi,
+      ],
+    },
+    // ---- Job / Work from Home Scams ----
+    {
+      "label": "💼 Fake job offer scam",
+      "weight": 10,
+      "patterns": [
+        /\b(work from home|earn (from|at) home|part.?time (job|work|earning))\b/gi,
+        /\b(₹\d+.{0,20}(per day|daily|weekly|monthly) (income|earning|salary))\b/gi,
+        /\b(no (experience|qualification|skill) (required|needed))\b/gi,
+      ],
+    },
+    // ---- SIM / Number Disconnect Scams ----
+    {
+      "label": "📱 SIM disconnect / telecom scam",
+      "weight": 15,
+      "patterns": [
+        /\b(sim (card )?(blocked|suspended|disconnected|deactivated))\b/gi,
+        /\b(mobile (number|sim) (will be|is being) (disconnected|blocked))\b/gi,
+        /\b(disconnect(ed)? (your )?(sim|mobile|number|service))\b/gi,
+        /\b(call (our|the) helpline|customer (care|service) number|press \d to speak)\b/gi,
+      ],
+    },
+    // ---- Crypto Scams ----
+    {
+      "label": "₿ Cryptocurrency scam",
+      "weight": 10,
+      "patterns": [
+        /\b(crypto|bitcoin|ethereum|usdt|bnb|nft).{0,30}(invest|earn|profit|return)\b/gi,
+        /\b(crypto (trading|signals?|bot|group|channel))\b/gi,
+      ],
+    },
+    // ---- Personal Info Harvest ----
+    {
+      "label": "🪪 Personal information harvesting",
+      "weight": 10,
+      "patterns": [
+        /\b(share (your )?(aadhaar|pan|passport|voter id))\b/gi,
+        /\b(send (your )?(photo|selfie|id proof|address proof))\b/gi,
+        /\b(date of birth|mother.?s name|full address|account number|ifsc)\b/gi,
+      ],
+    },
   ];
 
-  const URL_SHORTENERS = [
-    'bit.ly', 'tinyurl.com', 'goo.gl', 't.co', 'is.gd', 'buff.ly',
-    'ow.ly', 'shorte.st', 'adf.ly', 'cutt.ly', 'rb.gy', 'shorturl.at',
-    't.ly', 'v.gd', 'clck.ru', 'bit.do', 'qr.ae'
-  ];
-
-  const SCAM_KEYWORDS = {
-    high: ['suspended', 'disabled', 'blocked', 'unauthorized', 'illegal', 'arrest',
-           'warrant', 'seized', 'terminate', 'deactivate', 'compromised',
-           'seed phrase', 'recovery phrase', 'wallet validation', 'node sync',
-           'dapp connect', 'airdrop claim', 'kyc required', 'account restriction',
-           'unusual activity', 'final warning', 'immediate action'],
-    medium: ['urgent', 'immediately', 'verify', 'confirm', 'update', 'expire',
-             'kyc', 'otp', 'password', 'credential', 'ssn', 'pan card', 'aadhaar',
-             'bank account', 'credit card', 'debit card', 'pin number',
-             'work from home', 'part time job', 'earn daily', 'crypto investment',
-             'guaranteed return', 'double your money', 'tech support',
-             'virus detected', 'system infected', 'microsoft support', 'windows defender'],
-    low: ['click here', 'act now', 'limited time', 'free', 'winner', 'congratulations',
-          'prize', 'reward', 'claim', 'gift', 'lottery', 'selected', 'lucky',
-          'offer expires', 'exclusive deal', 'risk-free', 'buy now']
+  // ---- Category Keyword Mapping ----
+  const CATEGORY_KEYWORDS = {
+    "UPI / Payment Fraud": ["upi", "gpay", "phonepe", "paytm", "qr", "scan", "payment link", "bhim"],
+    "KYC Phishing": ["kyc", "know your customer", "update kyc", "kyc expired", "kyc verification"],
+    "Bank Impersonation": ["sbi", "hdfc", "icici", "axis", "kotak", "pnb", "bank account", "netbanking"],
+    "Govt / Telecom Scam": ["trai", "bsnl", "sim blocked", "sim disconnected", "rbi", "income tax", "aadhaar", "uidai"],
+    "Lottery / Prize Scam": ["lottery", "won", "winner", "prize", "lucky draw", "claim your"],
+    "Investment Fraud": ["guaranteed returns", "roi", "double your money", "invest", "profit per day", "whatsapp group", "telegram"],
+    "OTP Theft": ["otp", "one time password", "share otp", "enter otp"],
+    "Crypto Scam": ["crypto", "bitcoin", "ethereum", "usdt", "nft", "trading signals"],
+    "Job / WFH Scam": ["work from home", "part time", "earn from home", "no experience required"],
+    "SIM / Telecom Scam": ["sim blocked", "sim disconnected", "mobile disconnect", "telecom"],
+    "Personal Info Harvest": ["aadhaar", "pan", "passport", "share photo", "id proof"],
   };
 
-  const PHISHING_TARGETS = [
-    'paypal', 'apple', 'amazon', 'netflix', 'microsoft', 'google', 'facebook',
-    'instagram', 'whatsapp', 'telegram', 'twitter', 'linkedin', 'snapchat',
-    'hdfc', 'icici', 'sbi', 'axis', 'kotak', 'paytm', 'phonepe', 'gpay',
-    'razorpay', 'cred', 'flipkart', 'myntra', 'swiggy', 'zomato',
-    'chase', 'wellsfargo', 'bankofamerica', 'citibank', 'hsbc', 'barclays',
-    'dropbox', 'adobe', 'zoom', 'slack', 'github', 'steam', 'epic',
-    'binance', 'coinbase', 'kraken', 'metamask', 'trustwallet', 'phantom',
-    'pancakeswap', 'uniswap', 'opensea', 'blur', 'ledger', 'trezor'
-  ];
+  // ---- Extract amounts for logarithmic scoring ----
+  function _extractAmounts(text) {
+    const pattern = /(?:rs\.?|₹)?\s*(\d{1,7})/gi;
+    const matches = text.match(pattern) || [];
+    const amounts = [];
+    
+    for (const match of matches) {
+      const numMatch = match.match(/\d+/);
+      if (numMatch) {
+        amounts.push(parseInt(numMatch[0]));
+      }
+    }
+    
+    return amounts;
+  }
 
+  // ---- Advanced Text Analysis ----
+  function analyzeText(text) {
+    const reasons = [];
+    let ruleScore = 0;
+    const textLower = text.toLowerCase();
+
+    // ---- Weighted Pattern Scoring ----
+    for (const patternGroup of PATTERNS) {
+      for (const regex of patternGroup.patterns) {
+        if (regex.test(text)) {
+          ruleScore += patternGroup.weight;
+          reasons.push(patternGroup.label);
+          break; // Only score once per group
+        }
+      }
+    }
+
+    // ---- URL / Link Detection ----
+    const urlPattern = /(https?:\/\/|bit\.ly|tinyurl|t\.co|goo\.gl|rb\.gy|cutt\.ly|short\.|tiny\.|link\.|click\.|go\.)/gi;
+    if (urlPattern.test(text)) {
+      ruleScore += 25;
+      reasons.push("🔗 Suspicious URL/link detected");
+    }
+
+    // ---- Multi-Signal Escalation ----
+    if (reasons.length >= 4) {
+      ruleScore += 20;
+    } else if (reasons.length === 3) {
+      ruleScore += 10;
+    }
+
+    // ---- Unrealistic Return Detection (Logarithmic Method) ----
+    const amounts = _extractAmounts(text);
+    if (amounts.length >= 2) {
+      const requested = Math.min(...amounts);
+      const promised = Math.max(...amounts);
+
+      if (requested > 0) {
+        const ratio = promised / requested;
+        const logScore = Math.log(ratio + 1);
+
+        if (logScore > 8) {      // ~2980x return
+          ruleScore += 45;
+          reasons.push("💰 Extreme unrealistic return");
+        } else if (logScore > 6) {    // ~403x return
+          ruleScore += 35;
+          reasons.push("💰 Unrealistic financial return");
+        } else if (logScore > 3) {    // ~20x return
+          ruleScore += 20;
+          reasons.push("💰 Suspicious reward ratio");
+        } else if (logScore > 1.5) {  // ~3.5x return
+          ruleScore += 10;
+          reasons.push("💰 Questionable return offer");
+        }
+      }
+    }
+
+    // ---- Cap rule score at 100 ----
+    ruleScore = Math.min(ruleScore, 100);
+
+    // ---- Determine Category ----
+    let category = "General";
+    let bestCount = 0;
+    for (const [catName, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+      const count = keywords.filter(kw => textLower.includes(kw)).length;
+      if (count > bestCount) {
+        bestCount = count;
+        category = catName;
+      }
+    }
+
+    return {
+      isScam: ruleScore >= 45, // Made more strict to reduce false positives
+      confidence: ruleScore / 100,
+      riskScore: ruleScore,
+      reasons: reasons,
+      category: category
+    };
+  }
+
+  // ---- URL Analysis (kept from original) ----
   function analyzeURL(url) {
     const reasons = [];
     let score = 0;
@@ -57,145 +276,38 @@ const RiskRadarScanner = (() => {
     try {
       if (!/^https?:\/\//i.test(url) && /^[\w.-]+\.\w{2,}/.test(url)) url = 'https://' + url;
       const parsed = new URL(url);
-      const hostname = parsed.hostname.toLowerCase();
-      const pathname = parsed.pathname.toLowerCase();
-      const fullUrl = url.toLowerCase();
 
-      if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname)) {
-        score += 45; reasons.push('URL uses a raw IP address instead of a domain name');
+      // Suspicious TLDs
+      const suspiciousTlds = ['.xyz', '.tk', '.ml', '.ga', '.cf', '.gq', '.buzz', '.top', '.club'];
+      if (suspiciousTlds.some(tld => parsed.hostname.endsWith(tld))) {
+        score += 25;
+        reasons.push('Suspicious domain extension');
       }
 
-      const tld = '.' + hostname.split('.').pop();
-      if (SUSPICIOUS_TLDS.includes(tld)) {
-        score += 35; reasons.push('Suspicious top-level domain: ' + tld);
+      // URL shorteners
+      const shorteners = ['bit.ly', 'tinyurl.com', 'goo.gl', 't.co', 'is.gd'];
+      if (shorteners.some(short => url.includes(short))) {
+        score += 20;
+        reasons.push('URL shortener detected');
       }
 
-      if (URL_SHORTENERS.some(s => hostname === s || hostname.endsWith('.' + s))) {
-        score += 30; reasons.push('URL shortener detected - real destination is hidden');
+      // Missing HTTPS
+      if (parsed.protocol === 'http:') {
+        score += 15;
+        reasons.push('No HTTPS encryption');
       }
-
-      const subdomainCount = hostname.split('.').length - 2;
-      if (subdomainCount >= 3) {
-        score += 30; reasons.push('Excessive subdomains (' + subdomainCount + ') - common phishing tactic');
-      } else if (subdomainCount >= 2) {
-        score += 15; reasons.push('Multiple subdomains detected (' + subdomainCount + ')');
-      }
-
-      for (const brand of PHISHING_TARGETS) {
-        const domainParts = hostname.split('.');
-        const mainDomain = domainParts.slice(-2, -1)[0] || '';
-        if (hostname.includes(brand) && mainDomain !== brand) {
-          score += 40; reasons.push('Possible ' + brand + ' impersonation - brand in URL but not the real domain');
-          break;
-        }
-      }
-
-      for (const brand of PHISHING_TARGETS) {
-        if (isHomoglyphMatch(hostname, brand)) {
-          score += 45; reasons.push('Domain looks like "' + brand + '" using look-alike characters'); break;
-        }
-      }
-
-      const suspiciousPaths = ['login', 'signin', 'verify', 'secure', 'account', 'update', 'confirm', 'banking', 'password', 'credential', 'wallet'];
-      const pathMatches = suspiciousPaths.filter(kw => pathname.includes(kw));
-      if (pathMatches.length >= 2) {
-        score += 25; reasons.push('Suspicious keywords in URL path: ' + pathMatches.join(', '));
-      } else if (pathMatches.length === 1) {
-        score += 10; reasons.push('Sensitive keyword in URL path: ' + pathMatches[0]);
-      }
-
-      if (parsed.protocol === 'http:') { score += 15; reasons.push('No HTTPS encryption - connection is not secure'); }
-      if (url.length > 150) { score += 10; reasons.push('Unusually long URL (' + url.length + ' chars)'); }
-      if (fullUrl.includes('@')) { score += 20; reasons.push('URL contains @ symbol - possible misdirection'); }
-      
-      const encodedChars = (fullUrl.match(/%[0-9a-f]{2}/gi) || []).length;
-      if (encodedChars > 3) { score += 15; reasons.push('URL contains many encoded characters (' + encodedChars + ')'); }
-      
-      if (parsed.port && !['80', '443', ''].includes(parsed.port)) { score += 15; reasons.push('Unusual port number: ' + parsed.port); }
-      if (/\.\w{2,4}\.\w{2,4}$/.test(pathname)) { score += 20; reasons.push('Double file extension detected - possible malware disguise'); }
 
     } catch (e) {
-      score += 35; reasons.push('Malformed or invalid URL');
+      score += 35;
+      reasons.push('Malformed or invalid URL');
     }
 
-    if (reasons.length === 0) reasons.push('No suspicious indicators detected');
-    score = Math.min(100, score);
-    return { isScam: score >= 35, confidence: score / 100, reasons, riskScore: score };
-  }
-
-  function analyzeText(text) {
-    const reasons = []; let score = 0; const lower = text.toLowerCase();
-
-    const highMatches = SCAM_KEYWORDS.high.filter(kw => lower.includes(kw));
-    if (highMatches.length > 0) { score += Math.min(50, highMatches.length * 25); reasons.push('High-risk keywords: ' + highMatches.join(', ')); }
-
-    const medMatches = SCAM_KEYWORDS.medium.filter(kw => lower.includes(kw));
-    if (medMatches.length > 0) { score += Math.min(40, medMatches.length * 15); reasons.push('Suspicious keywords: ' + medMatches.join(', ')); }
-
-    const lowMatches = SCAM_KEYWORDS.low.filter(kw => lower.includes(kw));
-    if (lowMatches.length > 0) { score += Math.min(25, lowMatches.length * 10); reasons.push('Bait phrases: ' + lowMatches.join(', ')); }
-
-    const urls = text.match(/https?:\/\/[^\s<>"{}|\\^`\[\]]+/gi) || [];
-    for (const url of urls) {
-      const urlResult = analyzeURL(url);
-      if (urlResult.isScam) { score += 35; reasons.push('Contains suspicious link: ' + url.substring(0, 50)); }
-    }
-
-    const urgencyPatterns = [
-      /within \d+ (hour|minute|day)/i, /last (chance|warning|notice)/i, /action required/i, /respond (immediately|now|asap)/i,
-      /failure to .*(will result|may lead)/i, /your.*(has been|is being).*(suspend|block|lock|terminat)/i,
-      /account.*(will be|has been).*(clos|delet|block|suspend)/i, /do not (ignore|disregard)/i
-    ];
-    const urgencyMatches = urgencyPatterns.filter(p => p.test(text));
-    if (urgencyMatches.length > 0) { score += urgencyMatches.length * 12; reasons.push('Pressure/urgency language (' + urgencyMatches.length + ' patterns)'); }
-
-    const sensitivePatterns = [
-      /send.*(otp|pin|password|cvv)/i, /share.*(otp|pin|password|cvv|card)/i, /enter.*(otp|pin|password|cvv)/i,
-      /provide.*(bank|account|card|aadhaar|pan)/i, /click.*(link|here|below).*(verify|confirm|update)/i
-    ];
-    const sensitiveMatches = sensitivePatterns.filter(p => p.test(text));
-    if (sensitiveMatches.length > 0) { score += sensitiveMatches.length * 18; reasons.push('Requests sensitive personal/financial information'); }
-
-    const capsWords = text.split(/\s+/).filter(w => w.length > 3 && w === w.toUpperCase() && /[A-Z]/.test(w));
-    if (capsWords.length >= 3) { score += 12; reasons.push('Excessive CAPITAL LETTERS - pressure tactic'); }
-
-    if (/\b(1800|900|190)\d{6,}\b/.test(text)) { score += 10; reasons.push('Contains potentially suspicious phone number'); }
-    if (reasons.length === 0) reasons.push('No suspicious indicators detected');
-
-    score = Math.min(100, score);
-    return { isScam: score >= 30, confidence: score / 100, reasons, riskScore: score };
-  }
-
-  function isHomoglyphMatch(hostname, brand) {
-    const domainBase = hostname.split('.').slice(0, -1).join('');
-    if (domainBase === brand) return false;
-
-    const HOMOGLYPHS = {
-      'a': ['@', '4'], 'e': ['3'], 'i': ['1', 'l', '|'],
-      'o': ['0'], 'l': ['1', '|', 'I'], 'g': ['9', 'q'],
-      's': ['$', '5'], 't': ['+', '7']
+    return {
+      isScam: score >= 45, // Made more strict to reduce false positives
+      confidence: score / 100,
+      riskScore: score,
+      reasons: reasons
     };
-
-    let normalized = domainBase.toLowerCase();
-    for (const [letter, glyphs] of Object.entries(HOMOGLYPHS)) {
-      for (const g of glyphs) { normalized = normalized.split(g).join(letter); }
-    }
-    if (normalized !== domainBase.toLowerCase() && normalized.includes(brand)) return true;
-    if (brand.length >= 5) {
-      const dist = levenshtein(domainBase, brand);
-      if (dist > 0 && dist <= 2) return true;
-    }
-    return false;
-  }
-
-  function levenshtein(a, b) {
-    const matrix = Array.from({ length: a.length + 1 }, (_, i) => Array.from({ length: b.length + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0)));
-    for (let i = 1; i <= a.length; i++) {
-      for (let j = 1; j <= b.length; j++) {
-        matrix[i][j] = a[i - 1] === b[j - 1] ? matrix[i - 1][j - 1] : 1 + Math.min(matrix[i - 1][j], matrix[i][j - 1], matrix[i - 1][j - 1]);
-      }
-    }
-    return matrix[a.length][b.length];
   }
 
   return { analyzeURL, analyzeText };
@@ -210,12 +322,12 @@ const textResults = new Map();
 const stats = { safe: 0, dangerous: 0, totalScanned: 0 };
 
 let isAutoScanEnabled = true;
-let confidenceThreshold = 30; // Match background.js
+let confidenceThreshold = 50; // Increased to reduce false positives
 let hasInitialized = false;
 
 // ─── Initialize Settings ───
 try {
-  chrome.storage.sync.get({ autoScan: true, confidenceThreshold: 30 }, (s) => {
+  chrome.storage.sync.get({ autoScan: true, confidenceThreshold: 50 }, (s) => {
     isAutoScanEnabled = s.autoScan;
     confidenceThreshold = s.confidenceThreshold;
     console.log('[RiskRadar] Settings loaded:', s);
@@ -239,6 +351,9 @@ function processLocalScan(element, type, content, isUnknownContact = true) {
   if (element.hasAttribute('data-rr-scanned')) return;
   element.setAttribute('data-rr-scanned', 'true');
 
+  // Add message container class for positioning
+  element.classList.add('rr-message-container');
+
   let result;
   if (type === 'link') {
     if (linkResults.has(content)) {
@@ -256,9 +371,22 @@ function processLocalScan(element, type, content, isUnknownContact = true) {
     }
   }
 
-  // Apply styling based on contact type and scan result
-  if (result.isScam && result.riskScore >= confidenceThreshold && isUnknownContact) {
-    // Only show danger for unknown contacts with high risk
+  // Create and add the action button
+  const actionBtn = document.createElement('button');
+  actionBtn.className = 'rr-action-btn';
+  actionBtn.innerHTML = '🛡️';
+  actionBtn.title = 'RiskRadar Actions';
+  
+  // Add click handler for the button (you can customize this)
+  actionBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleActionClick(element, result, content);
+  });
+
+  // Apply styling based on scan result (show danger for all contacts)
+  if (result.isScam && result.riskScore >= confidenceThreshold) {
+    // Show danger for any message with high risk (regardless of contact type)
     element.classList.add('rr-danger');
     stats.dangerous++;
     
@@ -274,19 +402,14 @@ function processLocalScan(element, type, content, isUnknownContact = true) {
 
     createTooltip(element, result);
     createTooltip(badge, result);
-  } else if (!isUnknownContact) {
-    // Show safe green for saved contacts
-    element.classList.add('rr-safe');
-    stats.safe++;
-  } else if (!result.isScam || result.riskScore < confidenceThreshold) {
-    // Show safe for unknown contacts that pass the scan
-    element.classList.add('rr-safe');
-    stats.safe++;
   } else {
-    // Unknown contact with medium risk - still mark as safe but could add subtle warning
+    // Show safe for messages that pass the scan
     element.classList.add('rr-safe');
     stats.safe++;
   }
+
+  // Add the action button to the message
+  element.appendChild(actionBtn);
 
   stats.totalScanned++;
   
@@ -299,6 +422,30 @@ function processLocalScan(element, type, content, isUnknownContact = true) {
       }
     }
   } catch(e) {}
+}
+
+// Handle action button clicks
+function handleActionClick(messageElement, scanResult, messageContent) {
+  console.log('RiskRadar Action clicked:', {
+    message: messageContent.substring(0, 50) + '...',
+    riskScore: scanResult.riskScore,
+    isScam: scanResult.isScam
+  });
+  
+  // You can customize what happens when the button is clicked
+  // Examples: show detailed analysis, copy message, report, etc.
+  
+  // For now, let's show a simple alert with the scan result
+  const riskLevel = scanResult.riskScore >= 70 ? 'High' : scanResult.riskScore >= 45 ? 'Medium' : 'Low';
+  const message = `
+RiskRadar Analysis:
+Risk Level: ${riskLevel} (${scanResult.riskScore}%)
+Scam: ${scanResult.isScam ? 'Yes' : 'No'}
+Reasons: ${scanResult.reasons ? scanResult.reasons.slice(0, 3).join(', ') : 'None'}
+  `.trim();
+  
+  // You can replace this with your desired action
+  console.log(message);
 }
 
 // ─── DOM Scanning ───
@@ -441,6 +588,41 @@ function injectStyles() {
     .rr-tooltip-bar { width: 100%; height: 5px; background: #334155; border-radius: 5px; overflow: hidden; margin-bottom: 10px; }
     .rr-tooltip-bar-fill { height: 100%; border-radius: 5px; transition: width 0.5s ease; }
     .rr-tooltip-reasons { margin: 0; padding: 0 0 0 16px; font-size: 12px; color: #cbd5e1; line-height: 1.6; }
+    
+    /* New icon button styles */
+    .rr-action-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(59, 130, 246, 0.9);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: white;
+      opacity: 0;
+      transition: all 0.2s ease;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    
+    .rr-message-container:hover .rr-action-btn {
+      opacity: 1;
+    }
+    
+    .rr-action-btn:hover {
+      background: rgba(37, 99, 235, 1);
+      transform: scale(1.1);
+    }
+    
+    .rr-message-container {
+      position: relative !important;
+    }
   `;
   document.head.appendChild(style);
 }
