@@ -1,10 +1,13 @@
 import re
 import math
-from .patterns import PATTERNS, CATEGORY_KEYWORDS, PREVENTION_TIPS
+from .patterns import PATTERNS, PREVENTION_TIPS
 from . import ml_model as _ml
+from . import semantic_classifier as _semantic
 
-# Load ML model once at module import time
+# Load models once at module import time
 _ml.load_model()
+_semantic.load_semantic_model()
+
 
 
 def _extract_amounts(text: str):
@@ -143,14 +146,8 @@ def analyze_message(text: str) -> dict:
 
 
 def _classify_category(text: str) -> str:
-    """Classify the message into a fraud category based on keyword matching."""
-    best_category = "General"
-    best_count = 0
-
-    for category, keywords in CATEGORY_KEYWORDS.items():
-        count = sum(1 for kw in keywords if kw in text)
-        if count > best_count:
-            best_count = count
-            best_category = category
-
-    return best_category
+    """
+    Classify the message into a fraud category using semantic similarity.
+    Falls back to 'General' if no strong match is found.
+    """
+    return _semantic.classify_semantic(text)

@@ -597,12 +597,12 @@ class WhatsAppOCRFraudDetector {
         // Use Gemini 2.5 Flash API for highly accurate OCR
         return new Promise(async (resolve, reject) => {
             try {
-                console.log('🔍 Starting OCR with Gemini 2.5 Flash API...');
+                console.log('🔍 Starting OCR with Gemini 2.0 Flash API...');
                 
                 // Extract base64 part of the data URL (remove "data:image/png;base64,")
                 const base64Image = imageDataUrl.split(',')[1];
                 const apiKey = 'AIzaSyAz8ZlO_UQD2ZSKzr9s6N7lZlKRgOvfO7o'; // Hardcoded for hackathon prototype
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
                 const requestBody = {
                     "contents": [

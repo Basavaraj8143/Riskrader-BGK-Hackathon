@@ -19,7 +19,7 @@ def get_gemini_explanation(message: str, matched_patterns: list, category: str, 
 
         client = genai.Client(api_key=GEMINI_API_KEY)
 
-        prompt = f"""You are FinGuard AI, a financial fraud detection expert specializing in India's digital payment ecosystem.
+        prompt = f"""You are RiskRadar AI, a financial fraud detection expert specializing in India's digital payment ecosystem.
 
 A user submitted this suspicious message for analysis:
 "{message}"
@@ -52,7 +52,7 @@ Write for a non-technical Indian user."""
                 except Exception:
                     # Still rate limited — use fallback but label it
                     fb = _fallback_explanation(matched_patterns, category, score)
-                    fb["powered_by"] = "FinGuard Rule Engine (Gemini rate limited)"
+                    fb["powered_by"] = "RiskRadar Rule Engine (Gemini rate limited)"
                     return fb
             else:
                 raise
@@ -81,4 +81,4 @@ def _fallback_explanation(matched_patterns: list, category: str, score: int) -> 
         f"do not engage with the sender or follow any instructions in the message."
     )
 
-    return {"explanation": explanation, "powered_by": "FinGuard Rule Engine"}
+    return {"explanation": explanation, "powered_by": "RiskRadar Rule Engine"}

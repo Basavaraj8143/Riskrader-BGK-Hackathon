@@ -1,5 +1,5 @@
 """
-FinGuard ML Inference Module
+RiskRadar ML Inference Module
 ==============================
 Loads pre-trained TF-IDF + Logistic Regression model and provides
 a simple predict() interface.  Falls back gracefully if model files

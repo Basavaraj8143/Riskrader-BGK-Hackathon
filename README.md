@@ -6,7 +6,7 @@ Built as a hackathon submission, this project directly addresses India's fastest
 
 ## 🌟 Key Features
 
-1. **Hybrid Fraud Scoring Engine:** Analyzes text using rule-based regex patterns and an ML model (TF-IDF + Logistic Regression) to provide a 0-100 risk score and identify 12+ fraud categories.
+1. **Semantic Fraud Scoring Engine:** Analyzes text using rule-based regex patterns, a semantic similarity model (Sentence Transformers), and an ML classifier (TF-IDF + Logistic Regression) to provide a 0-100 risk score and identify 12+ fraud categories.
 2. **Evidence Lab (Flagship Feature):** Extracts crucial forensic entities (UPI IDs, phone numbers, URLs, payment amounts) from scam messages or screenshots (via OCR) and auto-generates a structured portal guide for easy filing on `cybercrime.gov.in`.
 3. **Privacy-First Explanations:** Employs a local LLM (DeepSeek R1 via Ollama) to explain exactly why a message is dangerous, ensuring your messages never leave your device.
 4. **Live Fraud Dashboard:** Fetches and categorizes real-time fraud trends and news using NewsAPI.
@@ -18,7 +18,7 @@ Built as a hackathon submission, this project directly addresses India's fastest
 
 ### Backend (Python / FastAPI)
 - **Framework:** FastAPI with Uvicorn
-- **AI/ML:** scikit-learn (Logistic Regression + TF-IDF), joblib, pandas
+- **AI/ML:** Sentence Transformers (all-MiniLM-L6-v2), scikit-learn (Logistic Regression + TF-IDF), joblib, pandas, torch
 - **LLM Integrations:** Ollama (Local DeepSeek R1 1.5b), Google GenAI SDK (Gemini 2.0 Flash for OCR/Research)
 - **Utilities:** ReportLab (PDF Generation), httpx (NewsAPI fetcher)
 

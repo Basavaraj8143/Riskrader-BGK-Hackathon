@@ -93,7 +93,7 @@ def get_local_explanation(
         }
     Falls back to a rule-based explanation if Ollama is unavailable.
     """
-    prompt = f"""You are FinGuard AI, a financial fraud detection expert for India.
+    prompt = f"""You are RiskRadar AI, a financial fraud detection expert for India.
 
 A user submitted this message for analysis:
 "{message}"
@@ -147,7 +147,7 @@ def _fallback_explanation(matched_patterns: list, category: str, score: int) -> 
     )
     return {
         "explanation": explanation,
-        "powered_by":  "FinGuard Rule Engine (Ollama offline)",
+        "powered_by":  "RiskRadar Rule Engine (Ollama offline)",
     }
 
 

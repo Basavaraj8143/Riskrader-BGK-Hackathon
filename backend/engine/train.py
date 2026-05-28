@@ -1,5 +1,5 @@
 """
-FinGuard ML Training Script
+RiskRadar ML Training Script
 ============================
 Trains a TF-IDF + Logistic Regression model on india_fraud_detection_FINAL.csv
 and saves the artifacts to engine/models/.
@@ -29,7 +29,7 @@ LR_PATH    = MODEL_DIR / "lr_model.pkl"
 
 def train():
     print("=" * 60)
-    print("  FinGuard ML Trainer — TF-IDF + Logistic Regression")
+    print("  RiskRadar ML Trainer — TF-IDF + Logistic Regression")
     print("=" * 60)
 
     # ── 1. Load dataset ───────────────────────────────────────────────────────

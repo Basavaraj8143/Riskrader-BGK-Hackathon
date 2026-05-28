@@ -9,7 +9,7 @@ from engine.extractor import extract_entities, format_complaint_context
 from engine.portal_guide import build_portal_guide
 from services.news_fetcher import fetch_fraud_trends
 
-app = FastAPI(title="FinGuard AI API", version="1.0.0")
+app = FastAPI(title="RiskRadar AI API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -56,7 +56,7 @@ async def generate_pdf_endpoint(req: PDFRequest):
 
 @app.get("/api/health")
 def health():
-    return {"status": "FinGuard AI is running 🛡️"}
+    return {"status": "RiskRadar AI is running 🛡️"}
 
 
 @app.post("/api/analyze")
@@ -89,8 +89,10 @@ async def analyze(req: MessageRequest):
 
     return {
         "score": result["score"],
+        "risk_score": result["score"], # compatibility for extension
         "rule_score": result["rule_score"],
         "level": result["level"],
+        "risk_level": result["level"], # compatibility for extension
         "level_emoji": result["level_emoji"],
         "category": result["category"],
         "matched_patterns": result["matched_patterns"],
@@ -174,8 +176,10 @@ async def research(req: MessageRequest):
 
     return {
         "score": result["score"],
+        "risk_score": result["score"], # compatibility for extension
         "rule_score": result["rule_score"],
         "level": result["level"],
+        "risk_level": result["level"], # compatibility for extension
         "level_emoji": result["level_emoji"],
         "category": result["category"],
         "matched_patterns": result["matched_patterns"],

@@ -20,6 +20,7 @@ bgkhack/
 │   ├── engine/            ← Core AI Engine
 │   │   ├── patterns.py       Rule-based fraud patterns + categories
 │   │   ├── scorer.py         Hybrid risk scoring (Rules + ML)
+│   │   ├── semantic_classifier.py  Sentence Transformers (Semantic Similarity)
 │   │   ├── ml_model.py       TF-IDF + Logistic Regression ML model
 │   │   ├── train.py          Model training script
 │   │   ├── extractor.py      Forensic entity extraction (regex)
@@ -50,21 +51,22 @@ bgkhack/
 
 ### 1. Hybrid Fraud Scoring (`scorer.py`)
 
-The heart of the system. Every message is scored on a **0–100 risk scale** using a two-layer hybrid approach:
+The heart of the system. Every message is scored on a **0–100 risk scale** using a three-layer hybrid approach:
 
 | Layer | Method | Weight |
 |-------|--------|--------|
 | Rule-based | Weighted regex pattern matching across 12+ fraud categories | 50% |
 | ML Model | TF-IDF vectorizer + Logistic Regression classifier | 50% |
+| Semantic | Sentence Transformers (Semantic Similarity) | Classification Only |
 
-**Risk Thresholds:**
-- 🔴 **HIGH** (61–100): Almost certainly a scam
-- 🟡 **MEDIUM** (31–60): Suspicious, proceed with caution
-- 🟢 **LOW** (0–30): Likely safe
+### 2. Semantic Engine (`semantic_classifier.py`)
 
-Special signals like multiple matched patterns (4+) or investment fraud language (guaranteed returns, daily %) trigger score escalation bonuses.
+Replaces legacy keyword matching with high-precision semantic similarity:
+- **Model:** `all-MiniLM-L6-v2` (Sentence Transformers)
+- **Method:** Computes cosine similarity between incoming text and "Semantic Centroids" (reference descriptions) for each of the 12 fraud categories.
+- **Benefit:** Detects fraud even when scammers use synonyms, typos, or varying sentence structures that keyword filters miss.
 
-### 2. ML Model (`ml_model.py` + `train.py`)
+### 3. ML Model (`ml_model.py` + `train.py`)
 
 - **Dataset:** `india_fraud_detection_FINAL.csv` — purpose-built dataset of Indian scam messages
 - **Pipeline:** Text → TF-IDF Vectorizer → Logistic Regression → Fraud Probability
@@ -191,6 +193,7 @@ Generates a properly formatted **PDF cybercrime complaint document** from the po
 | **Python 3.11+** | Core language |
 | **FastAPI** | REST API framework |
 | **Uvicorn** | ASGI server |
+| **Sentence Transformers** | `all-MiniLM-L6-v2` semantic similarity |
 | **scikit-learn** | TF-IDF + Logistic Regression ML |
 | **pandas** | Dataset handling for model training |
 | **joblib** | Model serialization |
@@ -199,6 +202,7 @@ Generates a properly formatted **PDF cybercrime complaint document** from the po
 | **ReportLab** | PDF generation |
 | **httpx** | Async HTTP for NewsAPI |
 | **python-dotenv** | Environment variable management |
+| **PyTorch** | Backend for Transformer models |
 
 ### Frontend
 | Technology | Purpose |
