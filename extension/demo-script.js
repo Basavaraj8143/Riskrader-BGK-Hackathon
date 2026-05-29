@@ -1,32 +1,32 @@
 // Quick demo injection script - paste this in WhatsApp Web console
 (function() {
-    console.log('🚀 Starting FinGuard AI Demo Injection...');
+    console.log('🚀 Starting RiskRadar AI Demo Injection...');
     
     // Check if already injected
-    if (document.getElementById('finguard-widget')) {
-        console.log('✅ FinGuard AI already loaded');
+    if (document.getElementById('riskradar-widget')) {
+        console.log('✅ RiskRadar AI already loaded');
         return;
     }
     
     // Inject CSS
     const css = `
-        #finguard-widget { position: fixed; top: 20px; right: 20px; z-index: 999999; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-        .finguard-widget-container { position: relative; }
-        .finguard-toggle { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #059669); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); transition: all 0.3s ease; color: white; }
-        .finguard-toggle:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); }
-        .finguard-panel { position: absolute; top: 70px; right: 0; width: 380px; max-height: 600px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 16px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); display: none; overflow: hidden; }
-        .finguard-header { background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .finguard-header h3 { margin: 0; font-size: 18px; font-weight: 600; }
-        .finguard-close { background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background 0.2s; }
-        .finguard-close:hover { background: rgba(255, 255, 255, 0.2); }
-        .finguard-content { padding: 20px; max-height: 500px; overflow-y: auto; }
-        .finguard-status { margin-bottom: 16px; padding: 12px; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border-left: 4px solid #10b981; }
+        #riskradar-widget { position: fixed; top: 20px; right: 20px; z-index: 999999; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .riskradar-widget-container { position: relative; }
+        .riskradar-toggle { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #059669); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); transition: all 0.3s ease; color: white; }
+        .riskradar-toggle:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); }
+        .riskradar-panel { position: absolute; top: 70px; right: 0; width: 380px; max-height: 600px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 16px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); display: none; overflow: hidden; }
+        .riskradar-header { background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .riskradar-header h3 { margin: 0; font-size: 18px; font-weight: 600; }
+        .riskradar-close { background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background 0.2s; }
+        .riskradar-close:hover { background: rgba(255, 255, 255, 0.2); }
+        .riskradar-content { padding: 20px; max-height: 500px; overflow-y: auto; }
+        .riskradar-status { margin-bottom: 16px; padding: 12px; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border-left: 4px solid #10b981; }
         .status-indicator { font-weight: 500; color: #059669; }
-        .finguard-message { margin-bottom: 16px; }
+        .riskradar-message { margin-bottom: 16px; }
         .message-preview { background: rgba(0, 0, 0, 0.05); padding: 12px; border-radius: 8px; border-left: 4px solid #6b7280; }
         .message-preview strong { color: #374151; display: block; margin-bottom: 8px; }
         .message-preview p { margin: 0; color: #6b7280; font-size: 14px; line-height: 1.4; }
-        .finguard-result { margin-bottom: 20px; }
+        .riskradar-result { margin-bottom: 20px; }
         .analysis-result { background: white; border-radius: 12px; padding: 16px; border: 1px solid rgba(0, 0, 0, 0.1); animation: slideIn 0.3s ease-out; }
         .risk-score { text-align: center; padding: 16px; border: 2px solid #10b981; border-radius: 12px; margin-bottom: 16px; background: rgba(16, 185, 129, 0.05); }
         .score-value { font-size: 32px; font-weight: bold; margin-bottom: 4px; color: #10b981; }
@@ -36,13 +36,13 @@
         .detail-item p { margin: 0; color: #6b7280; font-size: 13px; line-height: 1.4; }
         .detail-item ul { margin: 4px 0 0 0; padding-left: 16px; }
         .detail-item li { color: #ef4444; font-size: 12px; margin-bottom: 2px; }
-        .finguard-actions { display: flex; flex-direction: column; gap: 8px; }
-        .finguard-btn { padding: 12px 16px; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.2s; font-size: 14px; }
-        .finguard-btn.primary { background: linear-gradient(135deg, #10b981, #059669); color: white; }
-        .finguard-btn.primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
-        .finguard-btn.secondary { background: rgba(107, 114, 128, 0.1); color: #374151; border: 1px solid rgba(107, 114, 128, 0.2); }
-        .finguard-btn.secondary:hover { background: rgba(107, 114, 128, 0.2); }
-        .finguard-btn.secondary.active { background: #10b981; color: white; border-color: #10b981; }
+        .riskradar-actions { display: flex; flex-direction: column; gap: 8px; }
+        .riskradar-btn { padding: 12px 16px; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.2s; font-size: 14px; }
+        .riskradar-btn.primary { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+        .riskradar-btn.primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+        .riskradar-btn.secondary { background: rgba(107, 114, 128, 0.1); color: #374151; border: 1px solid rgba(107, 114, 128, 0.2); }
+        .riskradar-btn.secondary:hover { background: rgba(107, 114, 128, 0.2); }
+        .riskradar-btn.secondary.active { background: #10b981; color: white; border-color: #10b981; }
         @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     `;
     
@@ -53,7 +53,7 @@
     // Inject the main detector class (simplified version)
     class WhatsAppFraudDetector {
         constructor() {
-            this.apiBaseUrl = 'http://localhost:8000';
+            this.apiBaseUrl = 'https://riskradar-backend-ai.herokuapp.com';
             this.widgetVisible = false;
             this.currentMessage = '';
             this.isAnalyzing = false;
@@ -62,7 +62,7 @@
         }
 
         init() {
-            console.log('🛡️ FinGuard AI: WhatsApp Fraud Detector initialized');
+            console.log('🛡️ RiskRadar AI: WhatsApp Fraud Detector initialized');
             this.injectWidget();
             this.observeMessages();
             this.addKeyboardShortcut();
@@ -71,28 +71,28 @@
 
         injectWidget() {
             const widgetContainer = document.createElement('div');
-            widgetContainer.id = 'finguard-widget';
+            widgetContainer.id = 'riskradar-widget';
             widgetContainer.innerHTML = `
-                <div class="finguard-widget-container">
-                    <div class="finguard-toggle" id="finguard-toggle">
+                <div class="riskradar-widget-container">
+                    <div class="riskradar-toggle" id="riskradar-toggle">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
-                    <div class="finguard-panel" id="finguard-panel">
-                        <div class="finguard-header">
-                            <h3>FinGuard AI</h3>
-                            <button class="finguard-close" id="finguard-close">×</button>
+                    <div class="riskradar-panel" id="riskradar-panel">
+                        <div class="riskradar-header">
+                            <h3>RiskRadar AI</h3>
+                            <button class="riskradar-close" id="riskradar-close">×</button>
                         </div>
-                        <div class="finguard-content">
-                            <div class="finguard-status" id="finguard-status">
+                        <div class="riskradar-content">
+                            <div class="riskradar-status" id="riskradar-status">
                                 <span class="status-indicator">🔍 Ready</span>
                             </div>
-                            <div class="finguard-message" id="finguard-message"></div>
-                            <div class="finguard-result" id="finguard-result"></div>
-                            <div class="finguard-actions">
-                                <button class="finguard-btn primary" id="finguard-analyze">Analyze Current Message</button>
-                                <button class="finguard-btn secondary" id="finguard-auto">Auto-Detect: OFF</button>
+                            <div class="riskradar-message" id="riskradar-message"></div>
+                            <div class="riskradar-result" id="riskradar-result"></div>
+                            <div class="riskradar-actions">
+                                <button class="riskradar-btn primary" id="riskradar-analyze">Analyze Current Message</button>
+                                <button class="riskradar-btn secondary" id="riskradar-auto">Auto-Detect: OFF</button>
                             </div>
                         </div>
                     </div>
@@ -103,10 +103,10 @@
         }
 
         attachWidgetEvents() {
-            const toggle = document.getElementById('finguard-toggle');
-            const close = document.getElementById('finguard-close');
-            const analyzeBtn = document.getElementById('finguard-analyze');
-            const autoBtn = document.getElementById('finguard-auto');
+            const toggle = document.getElementById('riskradar-toggle');
+            const close = document.getElementById('riskradar-close');
+            const analyzeBtn = document.getElementById('riskradar-analyze');
+            const autoBtn = document.getElementById('riskradar-auto');
 
             toggle.addEventListener('click', () => this.toggleWidget());
             close.addEventListener('click', () => this.hideWidget());
@@ -115,13 +115,13 @@
         }
 
         toggleWidget() {
-            const panel = document.getElementById('finguard-panel');
+            const panel = document.getElementById('riskradar-panel');
             this.widgetVisible = !this.widgetVisible;
             panel.style.display = this.widgetVisible ? 'block' : 'none';
         }
 
         hideWidget() {
-            const panel = document.getElementById('finguard-panel');
+            const panel = document.getElementById('riskradar-panel');
             this.widgetVisible = false;
             panel.style.display = 'none';
         }
@@ -184,7 +184,7 @@
         }
 
         updateMessageDisplay(message) {
-            const messageDiv = document.getElementById('finguard-message');
+            const messageDiv = document.getElementById('riskradar-message');
             if (messageDiv) {
                 messageDiv.innerHTML = `
                     <div class="message-preview">
@@ -223,7 +223,7 @@
                 this.showStatus('✅ Analysis Complete', 'success');
                 
             } catch (error) {
-                console.error('FinGuard API Error:', error);
+                console.error('RiskRadar AI Error:', error);
                 this.showStatus('❌ Backend not running - Start with: uvicorn main:app --reload', 'error');
             } finally {
                 this.isAnalyzing = false;
@@ -231,7 +231,7 @@
         }
 
         displayResult(result) {
-            const resultDiv = document.getElementById('finguard-result');
+            const resultDiv = document.getElementById('riskradar-result');
             if (!resultDiv) return;
 
             const riskLevel = result.risk_level || 'UNKNOWN';
@@ -273,7 +273,7 @@
         }
 
         showStatus(message, type = 'info') {
-            const statusDiv = document.getElementById('finguard-status');
+            const statusDiv = document.getElementById('riskradar-status');
             if (statusDiv) {
                 statusDiv.innerHTML = `<span class="status-indicator">${message}</span>`;
             }
@@ -281,7 +281,7 @@
 
         toggleAutoDetect() {
             this.autoDetectEnabled = !this.autoDetectEnabled;
-            const autoBtn = document.getElementById('finguard-auto');
+            const autoBtn = document.getElementById('riskradar-auto');
             if (autoBtn) {
                 autoBtn.textContent = `Auto-Detect: ${this.autoDetectEnabled ? 'ON' : 'OFF'}`;
                 autoBtn.classList.toggle('active', this.autoDetectEnabled);
@@ -291,7 +291,7 @@
 
         addKeyboardShortcut() {
             document.addEventListener('keydown', (e) => {
-                // Alt + Shift + G to toggle widget (G for FinGuard)
+                // Alt + Shift + G to toggle widget (G for RiskRadar)
                 if (e.altKey && e.shiftKey && e.key === 'G') {
                     e.preventDefault();
                     this.toggleWidget();
@@ -308,7 +308,7 @@
     // Initialize the detector
     new WhatsAppFraudDetector();
     
-    console.log('✅ FinGuard AI Demo Injection Complete!');
+    console.log('✅ RiskRadar AI Demo Injection Complete!');
     console.log('🎯 Shortcuts: Ctrl+Shift+F (toggle), Ctrl+Shift+A (analyze)');
     console.log('💡 Click on any WhatsApp message to analyze it');
 })();

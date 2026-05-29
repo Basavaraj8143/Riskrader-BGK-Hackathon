@@ -1,10 +1,10 @@
-// FinGuard AI - WhatsApp Web Integration
+// RiskRadar AI - WhatsApp Web Integration
 // DEBUG: This should appear in console if script loads
-console.log('🚀 FinGuard content.js LOADED!');
+console.log('🚀 RiskRadar content.js LOADED!');
 
 class WhatsAppFraudDetector {
     constructor() {
-        this.apiBaseUrl = 'http://localhost:8000';
+        this.apiBaseUrl = 'https://riskradar-backend-ai.herokuapp.com';
         this.widgetVisible = false;
         this.currentMessage = '';
         this.isAnalyzing = false;
@@ -12,7 +12,7 @@ class WhatsAppFraudDetector {
     }
 
     init() {
-        console.log('🚀 FinGuard AI: Starting initialization...');
+        console.log('🚀 RiskRadar AI: Starting initialization...');
         console.log('📱 Current URL:', window.location.href);
         console.log('🔍 DOM ready state:', document.readyState);
         
@@ -36,33 +36,33 @@ class WhatsAppFraudDetector {
     scanExistingMessages() {
         // Use the correct selector based on DOM investigation
         const existingMessages = document.querySelectorAll('[role="row"]');
-        console.log(`FinGuard: Found ${existingMessages.length} existing messages`);
+        console.log(`RiskRadar: Found ${existingMessages.length} existing messages`);
         existingMessages.forEach(msg => this.processMessage(msg));
     }
 
     // Inject floating widget
     injectWidget() {
         const widgetContainer = document.createElement('div');
-        widgetContainer.id = 'finguard-widget';
+        widgetContainer.id = 'riskradar-widget';
         widgetContainer.innerHTML = `
-            <div class="finguard-widget-container">
-                <div class="finguard-toggle" id="finguard-toggle">
+            <div class="riskradar-widget-container">
+                <div class="riskradar-toggle" id="riskradar-toggle">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
-                <div class="finguard-panel" id="finguard-panel">
-                    <div class="finguard-header">
-                        <h3>FinGuard AI</h3>
-                        <button class="finguard-close" id="finguard-close">×</button>
+                <div class="riskradar-panel" id="riskradar-panel">
+                    <div class="riskradar-header">
+                        <h3>RiskRadar AI</h3>
+                        <button class="riskradar-close" id="riskradar-close">×</button>
                     </div>
-                    <div class="finguard-content">
-                        <div class="finguard-status" id="finguard-status">
+                    <div class="riskradar-content">
+                        <div class="riskradar-status" id="riskradar-status">
                             <span class="status-indicator">🔍 Ready - Click analyze icon next to any message</span>
                         </div>
-                        <div class="finguard-result" id="finguard-result"></div>
-                        <div class="finguard-actions">
-                            <button class="finguard-btn secondary" id="finguard-auto">Auto-Detect: OFF</button>
+                        <div class="riskradar-result" id="riskradar-result"></div>
+                        <div class="riskradar-actions">
+                            <button class="riskradar-btn secondary" id="riskradar-auto">Auto-Detect: OFF</button>
                         </div>
                     </div>
                 </div>
@@ -73,9 +73,9 @@ class WhatsAppFraudDetector {
     }
 
     attachWidgetEvents() {
-        const toggle = document.getElementById('finguard-toggle');
-        const close = document.getElementById('finguard-close');
-        const autoBtn = document.getElementById('finguard-auto');
+        const toggle = document.getElementById('riskradar-toggle');
+        const close = document.getElementById('riskradar-close');
+        const autoBtn = document.getElementById('riskradar-auto');
 
         toggle.addEventListener('click', () => this.toggleWidget());
         close.addEventListener('click', () => this.hideWidget());
@@ -83,13 +83,13 @@ class WhatsAppFraudDetector {
     }
 
     toggleWidget() {
-        const panel = document.getElementById('finguard-panel');
+        const panel = document.getElementById('riskradar-panel');
         this.widgetVisible = !this.widgetVisible;
         panel.style.display = this.widgetVisible ? 'block' : 'none';
     }
 
     hideWidget() {
-        const panel = document.getElementById('finguard-panel');
+        const panel = document.getElementById('riskradar-panel');
         this.widgetVisible = false;
         panel.style.display = 'none';
     }
@@ -148,20 +148,20 @@ class WhatsAppFraudDetector {
         console.log('📍 Element position style:', window.getComputedStyle(messageElement).position);
         
         // Check if icon already exists
-        if (messageElement.querySelector('.finguard-analyze-icon')) {
+        if (messageElement.querySelector('.riskradar-analyze-icon')) {
             console.log('⚠️ Icon already exists, skipping...');
             return;
         }
 
         // Create the icon with the working style from test
         const icon = document.createElement('div');
-        icon.className = 'finguard-analyze-icon';
+        icon.className = 'riskradar-analyze-icon';
         icon.innerHTML = `
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V11H13V17ZM13 9H11V7H13V9Z" fill="#10b981"/>
             </svg>
         `;
-        icon.title = 'Analyze with FinGuard AI';
+        icon.title = 'Analyze with RiskRadar AI';
         icon.style.cssText = `
             position: absolute;
             top: 10px;
@@ -224,7 +224,7 @@ class WhatsAppFraudDetector {
     }
 
     updateMessageDisplay(message) {
-        const messageDiv = document.getElementById('finguard-message');
+        const messageDiv = document.getElementById('riskradar-message');
         if (messageDiv) {
             messageDiv.innerHTML = `
                 <div class="message-preview">
@@ -261,7 +261,7 @@ class WhatsAppFraudDetector {
             this.showStatus('✅ Analysis Complete', 'success');
             
         } catch (error) {
-            console.error('FinGuard API Error:', error);
+            console.error('RiskRadar AI Error:', error);
             this.showStatus('❌ API Error - Make sure backend is running', 'error');
         } finally {
             this.isAnalyzing = false;
@@ -269,7 +269,7 @@ class WhatsAppFraudDetector {
     }
 
     displayResult(result) {
-        const resultDiv = document.getElementById('finguard-result');
+        const resultDiv = document.getElementById('riskradar-result');
         if (!resultDiv) return;
 
         const riskLevel = result.risk_level || 'UNKNOWN';
@@ -316,7 +316,7 @@ class WhatsAppFraudDetector {
     }
 
     showStatus(message, type = 'info') {
-        const statusDiv = document.getElementById('finguard-status');
+        const statusDiv = document.getElementById('riskradar-status');
         if (statusDiv) {
             const indicators = {
                 'info': '🔍',
@@ -332,7 +332,7 @@ class WhatsAppFraudDetector {
 
     toggleAutoDetect() {
         this.autoDetectEnabled = !this.autoDetectEnabled;
-        const autoBtn = document.getElementById('finguard-auto');
+        const autoBtn = document.getElementById('riskradar-auto');
         if (autoBtn) {
             autoBtn.textContent = `Auto-Detect: ${this.autoDetectEnabled ? 'ON' : 'OFF'}`;
             autoBtn.classList.toggle('active', this.autoDetectEnabled);
@@ -342,7 +342,7 @@ class WhatsAppFraudDetector {
 
     addKeyboardShortcut() {
         document.addEventListener('keydown', (e) => {
-            // Alt + Shift + G to toggle widget (G for FinGuard)
+            // Alt + Shift + G to toggle widget (G for RiskRadar)
             if (e.altKey && e.shiftKey && e.key === 'G') {
                 e.preventDefault();
                 this.toggleWidget();

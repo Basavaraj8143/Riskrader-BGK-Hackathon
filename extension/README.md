@@ -1,4 +1,4 @@
-# FinGuard AI - WhatsApp Web Extension
+# RiskRadar AI - WhatsApp Web Extension
 
 ## 🚀 Installation for Hackathon Demo
 
@@ -37,7 +37,7 @@ document.head.appendChild(style);
 ### 🎨 User-Friendly Interface
 - **Floating Widget**: Non-intrusive overlay on WhatsApp Web
 - **Keyboard Shortcuts**: 
-  - `Alt+Shift+G`: Toggle widget (G for FinGuard)
+  - `Alt+Shift+G`: Toggle widget (G for RiskRadar)
   - `Alt+Shift+A`: Analyze current message
 - **Real-time Results**: Instant feedback with explanations
 - **Dark Mode Support**: Matches WhatsApp Web theme
@@ -46,21 +46,21 @@ document.head.appendChild(style);
 
 1. **Message Monitoring**: Uses MutationObserver to detect new messages
 2. **Text Extraction**: Intelligently extracts message content from WhatsApp DOM
-3. **API Integration**: Sends messages to FinGuard AI backend for analysis
+3. **API Integration**: Sends messages to RiskRadar AI backend for analysis
 4. **Result Display**: Shows risk scores, categories, and explanations in-widget
 
 ## 📋 Demo Script for Judges
 
 ### Step 1: Setup
 ```
-1. Start FinGuard backend: cd backend && uvicorn main:app --reload
+1. Start RiskRadar backend: cd backend && uvicorn main:app --reload
 2. Install extension or use injection method
 3. Open WhatsApp Web
 ```
 
 ### Step 2: Live Demo
 ```
-1. Show the floating FinGuard widget (Ctrl+Shift+F)
+1. Show the floating RiskRadar widget (Ctrl+Shift+F)
 2. Enable Auto-Detect mode
 3. Receive/test a scam message (sample provided below)
 4. Watch automatic detection in action

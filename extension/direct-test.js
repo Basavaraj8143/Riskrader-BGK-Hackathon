@@ -12,7 +12,7 @@
         if (index < 3) return;
         
         // Check if already has icon
-        if (msg.querySelector('.finguard-test-icon')) return;
+        if (msg.querySelector('.riskradar-test-icon')) return;
         
         // Get message text
         const text = msg.textContent.trim();
@@ -20,7 +20,7 @@
         
         // Create a very visible test icon
         const icon = document.createElement('div');
-        icon.className = 'finguard-test-icon';
+        icon.className = 'riskradar-test-icon';
         icon.innerHTML = '🔍';
         icon.style.cssText = `
             position: absolute;

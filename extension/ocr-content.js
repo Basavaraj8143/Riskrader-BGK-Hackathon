@@ -3,7 +3,7 @@
 
 class WhatsAppOCRFraudDetector {
     constructor() {
-        this.apiBaseUrl = 'http://localhost:8000';
+        this.apiBaseUrl = 'https://riskradar-backend-ai.herokuapp.com';
         this.isAnalyzing = false;
         this.init();
     }
@@ -506,7 +506,7 @@ class WhatsAppOCRFraudDetector {
             }, 7000); // 10 second delay
 
         } catch (error) {
-            console.error('FinGuard OCR Error:', error);
+            console.error('RiskRadar OCR Error:', error);
             // Hide all errors, just show demo results after delay
             statusDiv.innerHTML = '<span class="analyzing">🤖 Analyzing for fraud...</span>';
             resultDiv.innerHTML = '';

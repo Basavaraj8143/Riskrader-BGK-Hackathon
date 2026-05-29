@@ -1,16 +1,16 @@
 // Quick test script - paste this in WhatsApp Web console
 (function() {
-    console.log('🧪 Testing FinGuard Icon Injection...');
+    console.log('🧪 Testing RiskRadar Icon Injection...');
     
     // Simple icon injection test
     function addTestIcon() {
         const messages = document.querySelectorAll('[data-testid="msg-container"], [data-testid="message"], .message');
         
         messages.forEach((msg, index) => {
-            if (msg.querySelector('.finguard-test-icon')) return;
+            if (msg.querySelector('.riskradar-test-icon')) return;
             
             const icon = document.createElement('div');
-            icon.className = 'finguard-test-icon';
+            icon.className = 'riskradar-test-icon';
             icon.innerHTML = '🔍';
             icon.style.cssText = `
                 position: absolute;
@@ -29,9 +29,9 @@
                 z-index: 9999;
             `;
             
-            icon.title = 'Test FinGuard Icon';
+            icon.title = 'Test RiskRadar Icon';
             icon.addEventListener('click', () => {
-                alert('FinGuard test clicked on message ' + (index + 1));
+                alert('RiskRadar test clicked on message ' + (index + 1));
             });
             
             msg.style.position = 'relative';
@@ -49,3 +49,4 @@
     
     console.log('🎯 Test script loaded! Look for 🔍 icons next to messages.');
 })();
+

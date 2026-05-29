@@ -1,12 +1,12 @@
-# FinGuard AI — Project Overview
+# RiskRadar AI — Project Overview
 
 > **Tagline:** *Your AI-powered shield against digital financial fraud.*
 
 ---
 
-## 🧭 What Is FinGuard AI?
+## 🧭 What Is RiskRadar AI?
 
-**FinGuard AI** is a full-stack, AI-powered fraud detection and cybercrime assistance platform built for the Indian digital ecosystem. It combines rule-based pattern matching, machine learning, and large language models (LLMs) to help everyday users identify scam messages, extract forensic evidence, and file cybercrime complaints — all in one place.
+**RiskRadar AI** is a full-stack, AI-powered fraud detection and cybercrime assistance platform built for the Indian digital ecosystem. It combines rule-based pattern matching, machine learning, and large language models (LLMs) to help everyday users identify scam messages, extract forensic evidence, and file cybercrime complaints — all in one place.
 
 The project was built as a hackathon submission (`bgkhack`) and targets one of India's fastest-growing problems: **online financial fraud via UPI, KYC phishing, investment scams, loan app abuse, and impersonation fraud.**
 

@@ -1,6 +1,6 @@
-# FinGuard AI — Your AI-Powered Shield Against Digital Fraud
+# RiskRadar AI — Your AI-Powered Shield Against Digital Fraud
 
-**FinGuard AI** is a full-stack, AI-powered fraud detection and cybercrime assistance platform built for the Indian digital ecosystem. It combines rule-based pattern matching, machine learning, and local large language models (LLMs) to help everyday users identify scam messages, extract forensic evidence, and file cybercrime complaints. 
+**RiskRadar AI** is a full-stack, AI-powered fraud detection and cybercrime assistance platform built for the Indian digital ecosystem. It combines rule-based pattern matching, machine learning, and local large language models (LLMs) to help everyday users identify scam messages, extract forensic evidence, and file cybercrime complaints. 
 
 Built as a hackathon submission, this project directly addresses India's fastest-growing problems: online financial fraud via UPI, KYC phishing, investment scams, loan app abuse, and impersonation fraud.
 
@@ -29,7 +29,7 @@ Built as a hackathon submission, this project directly addresses India's fastest
 
 ### Browser Extension (RiskRadar for WhatsApp Web)
 - **Core:** JavaScript, CSS, HTML
-- **Functionality:** Real-time DOM monitoring (MutationObserver), automatic message extraction, API integration with the FinGuard backend.
+- **Functionality:** Real-time DOM monitoring (MutationObserver), automatic message extraction, API integration with the RiskRadar backend.
 
 ---
 
@@ -41,13 +41,13 @@ A standout feature for the demo is our **Zero Copy-Paste Chrome Extension** desi
 - **Automatic Detection:** Scans WhatsApp messages in real-time as they arrive.
 - **Floating Widget:** Non-intrusive UI overlay right inside WhatsApp Web.
 - **Keyboard Shortcuts:** Use `Alt+Shift+G` to toggle the widget, and `Alt+Shift+A` to analyze the current message.
-- **Instant Analysis:** Instantly queries the local FinGuard backend to show risk scores, fraud categories, and explanations directly in the browser.
+- **Instant Analysis:** Instantly queries the local RiskRadar backend to show risk scores, fraud categories, and explanations directly in the browser.
 
 ### How to Install (For Demo):
 1. Open Chrome and navigate to `chrome://extensions/`
 2. Enable **Developer mode** in the top right.
 3. Click **Load unpacked** and select the `extension` folder inside this repository.
-4. Open WhatsApp Web and press `Alt+Shift+G` to bring up the FinGuard shield!
+4. Open WhatsApp Web and press `Alt+Shift+G` to bring up the RiskRadar shield!
 
 ---
 
@@ -77,7 +77,7 @@ npm run dev
 ---
 
 ## 🛡️ Privacy & Security
-FinGuard AI is built with privacy in mind. The core analysis endpoint (`/api/analyze`) and the Evidence Lab extraction use the **local DeepSeek R1 LLM**. This ensures that highly sensitive financial or personal messages do not get sent to external cloud APIs for core fraud detection. Cloud APIs (like Gemini) are only utilized for broad research (`/api/research`) or OCR capabilities.
+RiskRadar AI is built with privacy in mind. The core analysis endpoint (`/api/analyze`) and the Evidence Lab extraction use the **local DeepSeek R1 LLM**. This ensures that highly sensitive financial or personal messages do not get sent to external cloud APIs for core fraud detection. Cloud APIs (like Gemini) are only utilized for broad research (`/api/research`) or OCR capabilities.
 
 ---
 *Built with ❤️ to protect users against digital fraud.*

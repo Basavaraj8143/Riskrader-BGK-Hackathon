@@ -1,6 +1,6 @@
-/* FinGuard AI - WhatsApp Web Extension Styles */
+/* RiskRadar AI - WhatsApp Web Extension Styles */
 
-#finguard-widget {
+#riskradar-widget {
     position: fixed;
     top: 20px;
     right: 20px;
@@ -8,11 +8,11 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-.finguard-widget-container {
+.riskradar-widget-container {
     position: relative;
 }
 
-.finguard-toggle {
+.riskradar-toggle {
     width: 56px;
     height: 56px;
     border-radius: 50%;
@@ -27,12 +27,12 @@
     color: white;
 }
 
-.finguard-toggle:hover {
+.riskradar-toggle:hover {
     transform: scale(1.1);
     box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
 }
 
-.finguard-panel {
+.riskradar-panel {
     position: absolute;
     top: 70px;
     right: 0;
@@ -47,7 +47,7 @@
     overflow: hidden;
 }
 
-.finguard-header {
+.riskradar-header {
     background: linear-gradient(135deg, #10b981, #059669);
     color: white;
     padding: 16px 20px;
@@ -56,13 +56,13 @@
     align-items: center;
 }
 
-.finguard-header h3 {
+.riskradar-header h3 {
     margin: 0;
     font-size: 18px;
     font-weight: 600;
 }
 
-.finguard-close {
+.riskradar-close {
     background: none;
     border: none;
     color: white;
@@ -78,17 +78,17 @@
     transition: background 0.2s;
 }
 
-.finguard-close:hover {
+.riskradar-close:hover {
     background: rgba(255, 255, 255, 0.2);
 }
 
-.finguard-content {
+.riskradar-content {
     padding: 20px;
     max-height: 500px;
     overflow-y: auto;
 }
 
-.finguard-status {
+.riskradar-status {
     margin-bottom: 16px;
     padding: 12px;
     background: rgba(16, 185, 129, 0.1);
@@ -101,7 +101,7 @@
     color: #059669;
 }
 
-.finguard-message {
+.riskradar-message {
     margin-bottom: 16px;
 }
 
@@ -125,7 +125,7 @@
     line-height: 1.4;
 }
 
-.finguard-result {
+.riskradar-result {
     margin-bottom: 20px;
 }
 
@@ -187,13 +187,13 @@
     margin-bottom: 2px;
 }
 
-.finguard-actions {
+.riskradar-actions {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.finguard-btn {
+.riskradar-btn {
     padding: 12px 16px;
     border: none;
     border-radius: 8px;
@@ -203,27 +203,27 @@
     font-size: 14px;
 }
 
-.finguard-btn.primary {
+.riskradar-btn.primary {
     background: linear-gradient(135deg, #10b981, #059669);
     color: white;
 }
 
-.finguard-btn.primary:hover {
+.riskradar-btn.primary:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
-.finguard-btn.secondary {
+.riskradar-btn.secondary {
     background: rgba(107, 114, 128, 0.1);
     color: #374151;
     border: 1px solid rgba(107, 114, 128, 0.2);
 }
 
-.finguard-btn.secondary:hover {
+.riskradar-btn.secondary:hover {
     background: rgba(107, 114, 128, 0.2);
 }
 
-.finguard-btn.secondary.active {
+.riskradar-btn.secondary.active {
     background: #10b981;
     color: white;
     border-color: #10b981;
@@ -244,7 +244,7 @@
 
 /* Dark mode support for WhatsApp Web */
 @media (prefers-color-scheme: dark) {
-    .finguard-panel {
+    .riskradar-panel {
         background: rgba(17, 24, 39, 0.95);
         border: 1px solid rgba(255, 255, 255, 0.1);
     }
@@ -269,7 +269,7 @@
 
 /* Responsive adjustments */
 @media (max-width: 480px) {
-    .finguard-panel {
+    .riskradar-panel {
         width: 320px;
         right: -10px;
     }

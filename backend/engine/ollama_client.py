@@ -1,5 +1,5 @@
 """
-FinGuard — Local LLM Explainer (Ollama / DeepSeek R1)
+RiskRadar — Local LLM Explainer (Ollama / DeepSeek R1)
 =======================================================
 Used for:
   - /api/analyze      → get_local_explanation()   (fraud explanation)

@@ -1,13 +1,13 @@
 // Simple working demo - paste this in any website console
 (function() {
-    console.log('🚀 FinGuard Simple Demo Loading...');
+    console.log('🚀 RiskRadar Simple Demo Loading...');
     
     // Create widget
     const widget = document.createElement('div');
-    widget.id = 'finguard-simple-widget';
+    widget.id = 'riskradar-simple-widget';
     widget.innerHTML = `
         <div style="position: fixed; top: 20px; right: 20px; z-index: 999999; font-family: Arial, sans-serif;">
-            <button id="finguard-demo-btn" style="
+            <button id="riskradar-demo-btn" style="
                 width: 60px; 
                 height: 60px; 
                 border-radius: 50%; 
@@ -22,7 +22,7 @@
                 font-size: 24px;
             ">🔍</button>
             
-            <div id="finguard-demo-panel" style="
+            <div id="riskradar-demo-panel" style="
                 position: absolute; 
                 top: 70px; 
                 right: 0; 
@@ -34,11 +34,11 @@
                 display: none; 
                 border: 1px solid #e5e7eb;
             ">
-                <h3 style="margin: 0 0 16px 0; color: #10b981;">🛡️ FinGuard AI Analysis</h3>
-                <div id="finguard-demo-status" style="padding: 12px; background: #f0fdf4; border-radius: 8px; margin-bottom: 16px; color: #166534;">
+                <h3 style="margin: 0 0 16px 0; color: #10b981;">🛡️ RiskRadar AI Analysis</h3>
+                <div id="riskradar-demo-status" style="padding: 12px; background: #f0fdf4; border-radius: 8px; margin-bottom: 16px; color: #166534;">
                     Ready for fraud detection
                 </div>
-                <button id="finguard-analyze-btn" style="
+                <button id="riskradar-analyze-btn" style="
                     width: 100%; 
                     padding: 16px; 
                     background: linear-gradient(135deg, #10b981, #059669); 
@@ -49,7 +49,7 @@
                     cursor: pointer; 
                     margin-bottom: 16px;
                 ">📸 Analyze Screen for Fraud</button>
-                <div id="finguard-demo-result"></div>
+                <div id="riskradar-demo-result"></div>
             </div>
         </div>
     `;
@@ -57,11 +57,11 @@
     document.body.appendChild(widget);
     
     // Event handlers
-    const toggleBtn = document.getElementById('finguard-demo-btn');
-    const panel = document.getElementById('finguard-demo-panel');
-    const analyzeBtn = document.getElementById('finguard-analyze-btn');
-    const status = document.getElementById('finguard-demo-status');
-    const result = document.getElementById('finguard-demo-result');
+    const toggleBtn = document.getElementById('riskradar-demo-btn');
+    const panel = document.getElementById('riskradar-demo-panel');
+    const analyzeBtn = document.getElementById('riskradar-analyze-btn');
+    const status = document.getElementById('riskradar-demo-status');
+    const result = document.getElementById('riskradar-demo-result');
     
     toggleBtn.addEventListener('click', () => {
         panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
@@ -138,5 +138,5 @@
         `;
     });
     
-    console.log('✅ FinGuard Demo Ready! Click the 🔍 button to start.');
+    console.log('✅ RiskRadar Demo Ready! Click the 🔍 button to start.');
 })();

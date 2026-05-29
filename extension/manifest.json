@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "FinGuard AI - WhatsApp Fraud Detector",
+  "name": "RiskRadar AI - WhatsApp Fraud Detector",
   "version": "1.0.2",
   "description": "One-click fraud detection using OCR technology",
   "permissions": [
