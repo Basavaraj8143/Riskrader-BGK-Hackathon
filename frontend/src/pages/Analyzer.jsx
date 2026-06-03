@@ -155,6 +155,28 @@ export default function Analyzer() {
                         </div>
                     ) : (
                         <div>
+                            {/* Fallback Warning Banner */}
+                            {(result.powered_by?.includes('offline') || result.powered_by?.includes('Fallback') || result.powered_by?.includes('Rule Engine')) && (
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 10,
+                                    marginBottom: 16,
+                                    padding: '10px 14px',
+                                    borderRadius: 8,
+                                    background: 'rgba(245, 158, 11, 0.08)',
+                                    border: '1px solid rgba(245, 158, 11, 0.25)',
+                                    color: '#f59e0b',
+                                    fontSize: 11.5,
+                                    lineHeight: 1.5
+                                }}>
+                                    <AlertTriangle size={16} style={{ flexShrink: 0 }} />
+                                    <div>
+                                        <strong style={{ fontWeight: 700 }}>AI Offline:</strong> Running on local Rule-Engine fallback. Start Ollama with DeepSeek R1 locally for deep AI-powered explanations.
+                                    </div>
+                                </div>
+                            )}
+
                             <RiskGauge score={result.score} />
 
                             {/* ML Model Badge */}
@@ -193,19 +215,18 @@ export default function Analyzer() {
                                     ))}
                                 </div>
                             )}
-
                             <div className="explanation-block">
                                 <div className="explanation-badge">
-                                    {result.powered_by?.includes('Gemini') ? 'Cloud AI (Gemini)' :
-                                        result.powered_by?.includes('DeepSeek') || result.powered_by?.includes('Ollama') ? 'Local AI (DeepSeek)' :
+                                    {(result.powered_by?.includes('offline') || result.powered_by?.includes('Fallback') || result.powered_by?.includes('Rule Engine')) ? 'Rule Engine Fallback' :
+                                        result.powered_by?.includes('Gemini') ? 'Cloud AI (Gemini)' :
+                                        (result.powered_by?.includes('DeepSeek') || result.powered_by?.includes('Ollama')) ? 'Local AI (DeepSeek)' :
                                             'Rule Engine Fallback'}
                                     <span style={{ marginLeft: '12px', fontSize: 10, opacity: 0.6, fontStyle: 'normal', fontWeight: 'normal', textTransform: 'none' }}>
-                                        Source: {result.powered_by} {result.powered_by?.includes('DeepSeek') || result.powered_by?.includes('Gemini') ? '(0)' : '(1)'}
+                                        Source: {result.powered_by} {!(result.powered_by?.includes('offline') || result.powered_by?.includes('Fallback') || result.powered_by?.includes('Rule Engine')) && (result.powered_by?.includes('DeepSeek') || result.powered_by?.includes('Gemini')) ? '(0)' : '(1)'}
                                     </span>
                                 </div>
                                 <div className="explanation-text">"{result.explanation}"</div>
                             </div>
-
                             {result.prevention_tips?.length > 0 && (
                                 <>
                                     <div className="section-title mb-8">

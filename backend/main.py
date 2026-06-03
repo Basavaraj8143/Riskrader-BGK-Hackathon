@@ -111,6 +111,9 @@ async def analyze(req: MessageRequest):
         score=result["score"],
     )
 
+    # Step 3: Compute Psychological Profile (Semantic Genome - Disabled)
+    psych_profile = []
+
     # ── Increment real counters ──
     _counters["total_analyzed"] += 1
     if result["level"] == "HIGH":
@@ -130,6 +133,7 @@ async def analyze(req: MessageRequest):
         "prevention_tips": result["prevention_tips"],
         "explanation": explanation_data["explanation"],
         "powered_by": explanation_data["powered_by"],
+        "psychological_profile": psych_profile,
         # ML fields
         "ml_available":  result["ml_available"],
         "ml_verdict":    result["ml_verdict"],
@@ -308,6 +312,9 @@ async def extract_evidence(req: EvidenceRequest):
         incident_description=description,
     )
 
+    # --- Step 6: Compute Psychological Profile (Semantic Genome - Disabled) ---
+    psych_profile = []
+
     # ── Increment real counters ──
     _counters["total_analyzed"] += 1
     if analysis["level"] == "HIGH":
@@ -326,6 +333,7 @@ async def extract_evidence(req: EvidenceRequest):
         "powered_by": explanation_data["powered_by"],
         "complaint_draft": "", # Removed complaint feature, keeping backwards compat key if needed
         "complaint_by": "DeepSeek R1 (Local 🔒)",
+        "psychological_profile": psych_profile,
 
         "entity_count": sum(
             len(v) for v in entities.values() if isinstance(v, list)

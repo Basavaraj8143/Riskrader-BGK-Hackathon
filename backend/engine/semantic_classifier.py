@@ -6,7 +6,6 @@ semantic similarity rather than simple keyword matching.
 
 Model: all-MiniLM-L6-v2 (Lightweight & Fast)
 """
-
 import logging
 import numpy as np
 from sentence_transformers import SentenceTransformer, util
