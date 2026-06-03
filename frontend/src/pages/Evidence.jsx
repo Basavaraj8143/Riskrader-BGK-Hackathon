@@ -199,7 +199,8 @@ export default function Evidence() {
     const handleDownloadPdf = async () => {
         try {
             setLoading(true);
-            const r = await fetch('http://localhost:8000/api/generate-pdf', {
+            const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+            const r = await fetch(`${apiBase}/api/generate-pdf`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ guide: mergedGuide }),
@@ -244,7 +245,8 @@ export default function Evidence() {
         try {
             let body = { text: text.trim() };
             if (imageFile) body.image_base64 = await toBase64(imageFile);
-            const r = await fetch('http://localhost:8000/api/extract-evidence', {
+            const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+            const r = await fetch(`${apiBase}/api/extract-evidence`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
             });
             if (!r.ok) throw new Error(`Server error ${r.status}`);

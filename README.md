@@ -173,11 +173,11 @@ bgkhack/
 │   │   ├── App.jsx                 ← Router config & Navigation layout
 │   │   ├── index.css               ← Custom glassmorphism dark styles
 │   │   └── pages/
-│   │       ├── Dashboard.jsx       ← Usage statistics & live fraud news feed
+│   │       ├── Extension.jsx       ← Chrome Extension download page (Landing Page)
 │   │       ├── Analyzer.jsx        ← Ad-hoc message risk tester
 │   │       ├── Evidence.jsx        ← Multi-step screenshot OCR & complaint builder
 │   │       ├── Encyclopedia.jsx    ← Broad research lab powered by Gemini
-│   │       └── About.jsx           ← Team & project information
+│   │       └── About.jsx           ← Detailed technical platform specifications
 │   └── package.json
 │
 └── extension/                      ← Chrome Extension for WhatsApp Web
@@ -197,6 +197,7 @@ bgkhack/
 | `POST` | `/api/analyze` | Ingests a text message; returns hybrid score, classification, and local DeepSeek explanation. | **Req:** `{ "message": "str" }` <br> **Res:** `{ "score": 85, "level": "HIGH", "category": "KYC Phishing", "explanation": "str", "prevention_tips": [...] }` |
 | `POST` | `/api/extract-evidence` | Parses raw text or base64 screenshots (OCR). Extracts entities and constructs portal guide details. | **Req:** `{ "text": "str?", "image_base64": "str?" }` <br> **Res:** `{ "ocr_text": "str", "entities": {...}, "portal_guide": {...} }` |
 | `POST` | `/api/research` | High-latency deep research query. Uses Gemini 2.0 and gathers matching News trends. | **Req:** `{ "message": "str" }` <br> **Res:** `{ "explanation": "str", "related_news": [...] }` |
+| `GET` | `/api/download-extension` | Compiles the Chrome Extension on-the-fly into a ZIP archive and streams it. | **Res:** `application/zip` binary attachment |
 | `GET` | `/api/trends` | Fetches NewsAPI entries on Indian cyber fraud, cached locally. | **Res:** `{ "headlines": [...], "alert_level": "HIGH", "top_category": "str" }` |
 | `GET` | `/api/stats` | Fetches session counters (e.g. analyzed messages, prevented scams). | **Res:** `{ "total_analyzed": 1284, "high_risk_today": 312, ... }` |
 | `POST` | `/api/generate-pdf` | Takes portal guide fields and returns the binary PDF stream. | **Req:** `{ "guide": {...} }` <br> **Res:** `application/pdf` binary |

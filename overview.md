@@ -38,11 +38,11 @@ bgkhack/
         ├── App.jsx              Sidebar + routing shell
         ├── index.css            Global styles (dark theme, glassmorphism)
         └── pages/
-            ├── Dashboard.jsx    Live stats + fraud trend news
+            ├── Extension.jsx    Chrome Extension download page (Landing Page)
             ├── Analyzer.jsx     Message fraud analyzer
             ├── Evidence.jsx     Evidence Lab + complaint generator
             ├── Encyclopedia.jsx Research Lab (deep fraud research)
-            └── About.jsx        Project info page
+            └── About.jsx        Detailed technical platform specifications
 ```
 
 ---
@@ -147,18 +147,18 @@ Generates a properly formatted **PDF cybercrime complaint document** from the po
 | POST | `/api/analyze` | Analyze a suspicious message (Analyzer page) |
 | POST | `/api/research` | Deep research: analysis + related news (Research Lab) |
 | POST | `/api/extract-evidence` | Extract forensic entities + generate portal guide (Evidence Lab) |
-| GET | `/api/trends` | Fetch live fraud trend news (Dashboard) |
-| GET | `/api/stats` | Return live usage counters + article count (Dashboard) |
+| GET | `/api/download-extension` | Compiles the Chrome Extension on-the-fly into a ZIP archive and streams it. |
+| GET | `/api/trends` | Fetch live fraud trend news (Trends page) |
+| GET | `/api/stats` | Return live usage counters + article count |
 | POST | `/api/generate-pdf` | Generate downloadable complaint PDF |
 
 ---
 
 ## 🖥️ Frontend Pages (React + Vite)
 
-### Dashboard (`/`)
-- Displays **live statistics**: messages analyzed, high-risk detections, frauds prevented
-- Shows **top fraud categories** and a live news feed of recent fraud articles
-- Stats are fetched in real-time from `/api/stats` and `/api/trends`
+### Chrome Extension (`/`)
+- Displays specifications, keyboard shortcuts, and dynamic download button for the companion Chrome Web Extension.
+- Provides a detailed step-by-step setup guide for loading the extension unpacked in Google Chrome.
 
 ### Analyzer (`/analyzer`)
 - Clean text input for pasting suspicious SMS, WhatsApp, or email messages
@@ -181,7 +181,7 @@ Generates a properly formatted **PDF cybercrime complaint document** from the po
 - Useful for research, awareness, and understanding the fraud landscape
 
 ### About (`/about`)
-- Project information, team details, hackathon context
+- Comprehensive overview of the system architecture, hybrid risk scoring math, vision pipeline, local DeepSeek R1 privacy separation model, and active technology stacks.
 
 ---
 

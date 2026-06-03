@@ -155,7 +155,8 @@ export default function Encyclopedia() {
         if (!msg.trim()) return;
         setLoading(true); setError(null); setResult(null);
         try {
-            const r = await fetch('http://localhost:8000/api/research', {
+            const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+            const r = await fetch(`${apiBase}/api/research`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: msg }),

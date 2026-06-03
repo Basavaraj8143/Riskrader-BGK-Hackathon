@@ -49,7 +49,8 @@ export default function Trends() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch('http://localhost:8000/api/trends')
+        const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+        fetch(`${apiBase}/api/trends`)
             .then(r => r.json())
             .then(d => setData(d))
             .catch(() => setData(null))

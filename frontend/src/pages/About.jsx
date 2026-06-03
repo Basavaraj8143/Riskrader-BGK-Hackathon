@@ -1,132 +1,260 @@
+import React from 'react';
 import {
-    Zap, Layers, Bot, FileText, BarChart2, Palette,
-    Search, Newspaper, BookOpen, Shield, Trophy, Info
+  Cpu, Shield, Bot, Key, FileText, Database,
+  Settings, Layers, Chrome, ShieldAlert, CheckCircle2,
+  AlertTriangle, RefreshCw
 } from 'lucide-react';
 
-const TECH_STACK = [
-    { Icon: Zap, name: 'FastAPI', desc: 'Python backend' },
-    { Icon: Layers, name: 'React + Vite', desc: 'Frontend SPA' },
-    { Icon: Bot, name: 'Gemini AI', desc: 'Explanations' },
-    { Icon: Newspaper, name: 'NewsAPI', desc: 'Trend data' },
-    { Icon: BarChart2, name: 'Recharts', desc: 'Visualizations' },
-    { Icon: Palette, name: 'Custom CSS', desc: 'Design system' },
-];
-
-const FEATURES = [
-    { Icon: Search, text: 'Real-time message analysis with rule-based NLP + 50+ Indian fraud patterns' },
-    { Icon: Bot, text: 'Gemini AI-powered human-readable explanations for every detected threat' },
-    { Icon: BarChart2, text: 'Risk scoring engine: 0–100 score with HIGH / MEDIUM / LOW classification' },
-    { Icon: Newspaper, text: 'Live fraud trend tracking via NewsAPI with 7 keyword categories' },
-    { Icon: BookOpen, text: 'Encyclopedia of 8 major Indian digital fraud types with red flags' },
-    { Icon: Shield, text: 'Actionable prevention advice with official reporting channel links' },
-];
-
 export default function About() {
-    return (
-        <div>
-            <div className="page-header">
-                <div className="page-label">
-                    <Info size={11} /> Project Overview
-                </div>
-                <h1 className="page-title">
-                    About <span className="highlight">RiskRadar</span>
-                </h1>
-            </div>
-
-            {/* Hero card */}
-            <div className="card about-hero mb-20" style={{ marginBottom: 20 }}>
-                <div className="hero-badge">
-                    <Shield size={12} /> Hackathon Prototype
-                </div>
-                <div className="about-title">Fighting Fraud<br />with Intelligence</div>
-                <p className="about-sub">
-                    RiskRadar is a real-time fraud intelligence dashboard built to protect India's 500M+ digital payment users
-                    from UPI scams, phishing attacks, fake loan apps, and investment frauds.
-                </p>
-            </div>
-
-            {/* Stats */}
-            <div className="stats-highlight-row mb-20" style={{ marginBottom: 20 }}>
-                <div className="card stat-highlight-card">
-                    <div className="stat-highlight-num" style={{ color: 'var(--danger)' }}>50+</div>
-                    <div className="stat-highlight-label">Fraud Patterns<br />in Detection Engine</div>
-                </div>
-                <div className="card stat-highlight-card">
-                    <div className="stat-highlight-num" style={{ color: 'var(--accent-light)' }}>13</div>
-                    <div className="stat-highlight-label">Scam Categories<br />Covered</div>
-                </div>
-                <div className="card stat-highlight-card">
-                    <div className="stat-highlight-num" style={{ color: 'var(--safe)' }}>100ms</div>
-                    <div className="stat-highlight-label">Average Analysis<br />Response Time</div>
-                </div>
-            </div>
-
-            {/* Features */}
-            <div className="card" style={{ padding: '24px', marginBottom: 20 }}>
-                <div className="section-title">
-                    <Layers size={13} /> Core Features
-                </div>
-                <div className="features-grid">
-                    {FEATURES.map(f => {
-                        const Icon = f.Icon;
-                        return (
-                            <div key={f.text} className="feature-item">
-                                <div className="feature-icon">
-                                    <Icon size={14} color="var(--accent-light)" />
-                                </div>
-                                <div className="feature-text">{f.text}</div>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
-
-            {/* Problem stat */}
-            <div className="card" style={{ padding: '24px', marginBottom: 20, background: 'rgba(239,68,68,0.04)', borderColor: 'rgba(239,68,68,0.12)' }}>
-                <div className="section-title" style={{ color: 'var(--danger)' }}>
-                    <Shield size={13} /> The Problem We're Solving
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
-                    {[
-                        { stat: '₹11,000 Cr', label: 'Lost to digital fraud in India (2024)', color: 'var(--danger)' },
-                        { stat: '7.7 Lakh', label: 'Cyber crime cases reported annually', color: 'var(--warning)' },
-                        { stat: '85%', label: 'Victims had no idea they were being scammed', color: 'var(--accent-light)' },
-                    ].map(item => (
-                        <div key={item.label} style={{ textAlign: 'center', padding: '16px 8px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, border: '1px solid var(--border-muted)' }}>
-                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 26, fontWeight: 700, color: item.color, letterSpacing: -1, marginBottom: 6 }}>{item.stat}</div>
-                            <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }}>{item.label}</div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Tech stack */}
-            <div className="card" style={{ padding: '24px' }}>
-                <div className="section-title">
-                    <Layers size={13} /> Tech Stack
-                </div>
-                <div className="tech-grid">
-                    {TECH_STACK.map(t => {
-                        const Icon = t.Icon;
-                        return (
-                            <div key={t.name} className="tech-item">
-                                <div className="tech-emoji">
-                                    <Icon size={18} color="var(--accent-light)" />
-                                </div>
-                                <div>
-                                    <div className="tech-name">{t.name}</div>
-                                    <div className="tech-desc">{t.desc}</div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-
-                <div style={{ marginTop: 20, padding: '12px 16px', background: 'var(--accent-dim)', borderRadius: 8, border: '1px solid rgba(59,130,246,0.15)', fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7, display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                    <Trophy size={14} color="var(--accent-light)" style={{ flexShrink: 0, marginTop: 2 }} />
-                    Built for hackathon demonstrating real-world impact potential. Architecture supports scaling to production with authentication, database persistence, and live ML model integration.
-                </div>
-            </div>
+  return (
+    <div>
+      <div className="page-header">
+        <div className="page-label">
+          <Layers size={11} /> Platform Architecture
         </div>
-    );
+        <h1 className="page-title">
+          System <span className="highlight">Specifications</span> & Logic
+        </h1>
+      </div>
+
+      {/* Main Hero Architecture Introduction */}
+      <div className="card about-hero mb-20" style={{ marginBottom: 20 }}>
+        <div className="hero-badge">
+          <Shield size={12} /> Tech Stack & Logic
+        </div>
+        <div className="about-title">RiskRadar AI Engine</div>
+        <p className="about-sub">
+          RiskRadar AI is built to defend digital banking and payment users from digital financial fraud. It achieves high-accuracy detection and automated documentation by executing a four-stage security pipeline.
+        </p>
+      </div>
+
+      {/* Technical Pipeline Visualization */}
+      <div className="card mb-20" style={{ padding: 24, marginBottom: 20 }}>
+        <div className="section-title">
+          <Cpu size={13} color="var(--accent-light)" /> Ingestion & Processing Pipeline
+        </div>
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(4, 1fr)', 
+          gap: 16, 
+          marginTop: 20,
+          position: 'relative' 
+        }}>
+          {[
+            {
+              step: '01',
+              title: 'Ingestion Layer',
+              desc: 'Accepts raw text or screenshot uploads. Screenshot OCR is powered by Gemini 2.0 Flash Vision for instant extraction.',
+              tag: 'Text / OCR Vision'
+            },
+            {
+              step: '02',
+              title: 'Hybrid Scoring',
+              desc: 'Evaluates inputs across Regex rules (50%), ML classifications (50%), and Sentence Transformers (all-MiniLM-L6-v2) semantic similarity.',
+              tag: 'Hybrid Engine'
+            },
+            {
+              step: '03',
+              title: 'Privacy Explanation',
+              desc: 'Sends parsed text to a local DeepSeek R1 model via Ollama to generate an explainable incident verdict securely on the local device.',
+              tag: 'Ollama / DeepSeek R1'
+            },
+            {
+              step: '04',
+              title: 'Complaint Output',
+              desc: 'Extracts UPI IDs, phones, URLs, and amounts. Generates a cybercrime.gov.in portal guide and downloads a ReportLab PDF.',
+              tag: 'Entity Parser & PDF'
+            }
+          ].map((item, index) => (
+            <div 
+              key={index} 
+              style={{ 
+                background: 'rgba(255,255,255,0.01)', 
+                border: '1px solid var(--border-muted)', 
+                borderRadius: 8, 
+                padding: 16,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                minHeight: 180
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <span style={{ fontSize: 24, fontWeight: 800, color: 'var(--accent-light)', opacity: 0.8, fontFamily: 'var(--font-mono)' }}>{item.step}</span>
+                  <span style={{ fontSize: 9, padding: '2px 6px', background: 'var(--accent-dim)', color: 'var(--accent-light)', borderRadius: 4, fontWeight: 600 }}>{item.tag}</span>
+                </div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>{item.title}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.5 }}>{item.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Deep-Dives Rows */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
+        {/* Hybrid Scoring Block */}
+        <div className="card" style={{ padding: 24 }}>
+          <div className="section-title">
+            <ShieldAlert size={14} color="var(--danger)" /> Hybrid Risk Scoring Math
+          </div>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8, lineHeight: 1.5 }}>
+            To avoid high false-positive rates of pure pattern matching and the edge-case blindspots of ML, RiskRadar AI combines their strengths:
+          </p>
+
+          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 16, fontSize: 12 }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--border-muted)', textAlign: 'left' }}>
+                <th style={{ padding: '8px 0', color: 'var(--text-secondary)' }}>Component</th>
+                <th style={{ padding: '8px 0', color: 'var(--text-secondary)' }}>Methodology</th>
+                <th style={{ padding: '8px 0', textAlign: 'right', color: 'var(--text-secondary)' }}>Weight</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+                <td style={{ padding: '10px 0', fontWeight: 600 }}>Rule Engine</td>
+                <td style={{ padding: '10px 0', color: 'var(--text-muted)' }}>Weighted regex over 12 fraud categories</td>
+                <td style={{ padding: '10px 0', textAlign: 'right', fontWeight: 600, color: 'var(--accent-light)' }}>50%</td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+                <td style={{ padding: '10px 0', fontWeight: 600 }}>ML Classifier</td>
+                <td style={{ padding: '10px 0', color: 'var(--text-muted)' }}>TF-IDF Vectorizer + Logistic Regression</td>
+                <td style={{ padding: '10px 0', textAlign: 'right', fontWeight: 600, color: 'var(--accent-light)' }}>50%</td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+                <td style={{ padding: '10px 0', fontWeight: 600 }}>Semantic Encoder</td>
+                <td style={{ padding: '10px 0', color: 'var(--text-muted)' }}>Sentence Transformers (centroid cos-sim)</td>
+                <td style={{ padding: '10px 0', textAlign: 'right', fontWeight: 600, color: 'var(--safe)' }}>Classify Only</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div style={{ marginTop: 16, padding: 12, background: 'rgba(255,255,255,0.02)', borderRadius: 6, border: '1px solid var(--border-muted)', fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.5 }}>
+            <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Fallback Protection:</span> If the ML training vector weights are missing, the scoring engine automatically shifts to rule-based fallback mode, preserving platform uptime.
+          </div>
+        </div>
+
+        {/* Privacy-First Design Block */}
+        <div className="card" style={{ padding: 24, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div>
+            <div className="section-title">
+              <Bot size={14} color="var(--safe)" /> Privacy-First Architecture
+            </div>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8, lineHeight: 1.6 }}>
+              RiskRadar separates local scanning tasks from research lookups to ensure that sensitive financial details, credentials, or personal names are never leaked.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 16 }}>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <div style={{ width: 6, height: 6, borderRadius: 3, background: 'var(--accent-light)', marginTop: 6 }} />
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 600 }}>Local Scan & Extract (Ollama / DeepSeek R1)</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>Sensitive chat strings analyzed via local LLM instances. Input data never leaves your desktop environment.</div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <div style={{ width: 6, height: 6, borderRadius: 3, background: 'var(--accent-light)', marginTop: 6 }} />
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 600 }}>Sandbox Research Lab (Google Gemini API)</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>General search and OCR vision tasks utilize secure external APIs. No personal identification data (PII) is transmitted.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.15)', padding: '10px 12px', borderRadius: 6, fontSize: 11, color: 'var(--text-secondary)' }}>
+            <CheckCircle2 size={14} color="var(--safe)" style={{ flexShrink: 0 }} />
+            Zero-storage: No analyzed chat logs are persisted on backend databases.
+          </div>
+        </div>
+      </div>
+
+      {/* Chrome Extension & Web Overlay Integration */}
+      <div className="card mb-20" style={{ padding: 24, marginBottom: 20 }}>
+        <div className="section-title">
+          <Chrome size={13} color="var(--accent-light)" /> WhatsApp Web Extension Mechanics
+        </div>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8, lineHeight: 1.6 }}>
+          The companion Chrome extension injects a lightweight Javascript client directly inside the active tab DOM of WhatsApp Web:
+        </p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginTop: 16 }}>
+          {[
+            {
+              title: 'MutationObserver Hooks',
+              desc: 'Reacts to DOM mutations to scan incoming chat elements asynchronously as bubbles enter the view area.',
+              icon: RefreshCw
+            },
+            {
+              title: 'Keyboard Listeners',
+              desc: 'Injects keydown bindings: Alt+Shift+G opens/toggles the HUD, and Alt+Shift+A analyzes selected text strings.',
+              icon: Key
+            },
+            {
+              title: 'Local API Queries',
+              desc: 'Queries the FastAPI REST service on localhost:8000 via fetch requests to get risk categorizations and tips.',
+              icon: Settings
+            }
+          ].map((item, index) => {
+            const Icon = item.icon;
+            return (
+              <div 
+                key={index} 
+                style={{ 
+                  background: 'rgba(255,255,255,0.01)', 
+                  border: '1px solid var(--border-muted)', 
+                  borderRadius: 6, 
+                  padding: 14 
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                  <Icon size={14} color="var(--accent-light)" />
+                  <div style={{ fontSize: 12, fontWeight: 600 }}>{item.title}</div>
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.5 }}>{item.desc}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Technology Stack Specifications */}
+      <div className="card" style={{ padding: 24 }}>
+        <div className="section-title">
+          <Database size={13} color="var(--accent-light)" /> Technology Stack Specifications
+        </div>
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(4, 1fr)', 
+          gap: 16, 
+          marginTop: 20 
+        }}>
+          {[
+            { name: 'FastAPI', desc: 'Python REST API framework hosting endpoints for analysis, trends, OCR and PDF compilation.' },
+            { name: 'React + Vite', desc: 'Single-page React dashboard styling using glassmorphism layouts and responsive design.' },
+            { name: 'Sentence Transformers', desc: 'Embeds raw input strings into 384-dimensional spaces for category centroid cosine math.' },
+            { name: 'Scikit-Learn ML', desc: 'Combines a TF-IDF vectorizer and Logistic Regression classifier for fraud probability scoring.' },
+            { name: 'Ollama / DeepSeek R1', desc: 'Hosts DeepSeek R1 locally for privacy-preserving, structured incident evaluations.' },
+            { name: 'Google GenAI SDK', desc: 'Integrates Gemini 2.0 Flash for screenshot text OCR and Encyclopedia deep research.' },
+            { name: 'ReportLab PDF', desc: 'Generates structured cybercrime complaint briefs in standard PDF document format.' },
+            { name: 'Chrome manifest v3', desc: 'Browser extension manifest standard injecting content script listeners.' }
+          ].map((tech, index) => (
+            <div 
+              key={index} 
+              style={{ 
+                background: 'rgba(255,255,255,0.01)', 
+                border: '1px solid var(--border-muted)', 
+                borderRadius: 6, 
+                padding: 12 
+              }}
+            >
+              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>{tech.name}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.4 }}>{tech.desc}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }

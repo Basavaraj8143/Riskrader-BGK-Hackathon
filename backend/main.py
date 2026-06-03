@@ -54,9 +54,40 @@ async def generate_pdf_endpoint(req: PDFRequest):
     except Exception as e:
         return {"error": str(e)}
 
+@app.get("/api/download-extension")
+def download_extension():
+    """Zip the extension directory on the fly and return as a downloadable file."""
+    import io
+    import zipfile
+    import os
+    from fastapi.responses import StreamingResponse
+    
+    memory_file = io.BytesIO()
+    extension_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "extension"))
+    
+    if not os.path.exists(extension_dir):
+        return {"error": f"Extension directory not found at {extension_dir}"}
+        
+    with zipfile.ZipFile(memory_file, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirs, files in os.walk(extension_dir):
+            for file in files:
+                file_path = os.path.join(root, file)
+                if any(ignored in file_path for ignored in [".git", "__pycache__", "venv"]):
+                    continue
+                arcname = os.path.relpath(file_path, extension_dir)
+                zipf.write(file_path, arcname)
+                
+    memory_file.seek(0)
+    return StreamingResponse(
+        memory_file,
+        media_type="application/zip",
+        headers={"Content-Disposition": "attachment; filename=riskradar-extension.zip"}
+    )
+
 @app.get("/api/health")
 def health():
     return {"status": "RiskRadar AI is running 🛡️"}
+
 
 
 @app.post("/api/analyze")
